@@ -1,14 +1,16 @@
 import React, { useState } from "react"
-import "./details.css"
-import "../../components/header/header.css"
-import img from "../../assets/images/b5.jpg"
+import styles from './DetailsPages.module.scss'
+import classNames from "classnames/bind";
 import { BsPencilSquare } from "react-icons/bs"
 import { AiOutlineDelete } from "react-icons/ai"
 import { useParams } from "react-router-dom"
 import { useEffect } from "react"
 import { blog } from "../../assets/data/data"
+import Header from "../../components/header/Header";
 
-export const DetailsPages = () => {
+const cx = classNames.bind(styles);
+
+const DetailsPages = () => {
   const { id } = useParams()
   const [blogs, setBlogs] = useState(null)
 
@@ -21,18 +23,19 @@ export const DetailsPages = () => {
 
   return (
     <>
+      <Header />
       {blogs ? (
-        <section className='singlePage'>
-          <div className='container'>
-            <div className='left'>
+        <section className={cx("singlePage")}>
+          <div className={cx("container")}>
+            <div className={cx("left")}>
               <img src={blogs.cover} alt='' />
             </div>
-            <div className='right'>
-              <div className='buttons'>
-                <button className='button'>
+            <div className={cx("right")}>
+              <div className={cx("buttons")}>
+                <button className={cx("button")}>
                   <BsPencilSquare />
                 </button>
-                <button className='button'>
+                <button className={cx("button")}>
                   <AiOutlineDelete />
                 </button>
               </div>
@@ -47,3 +50,5 @@ export const DetailsPages = () => {
     </>
   )
 }
+
+export default DetailsPages
