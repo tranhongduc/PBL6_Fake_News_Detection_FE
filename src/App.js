@@ -7,11 +7,11 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 
 const Loading = lazy(() => import("./components/loading/Loading"));
 const Home = lazy(() => import("./pages/home/Home"));
-const Login = lazy(() => import("./pages/login/Login"));
 const Register = lazy(() => import("./pages/register/Register"));
 const DetailsPages = lazy(() => import("./pages/details/DetailsPages"));
 const Account = lazy(() => import("./pages/account/Account"));
 const Create = lazy(() => import("./components/create/Create"));
+const Login = lazy(() => import("./pages/login/Login"));
 
 const App = () => {
   return (

@@ -62,19 +62,19 @@ const Login = () => {
     formData.append('email', values.email);
     formData.append('password', values.password);
 
-    http.post('/auth/login', formData)
+    http.post('/login', formData)
       .then((resolve) => {
         console.log(resolve);
-        const user = resolve.data.user;
-        setToken(user, resolve.data.access_token, user.role_name);
-          if (user.role_name === ROLE_ADMIN) {
-          navigate('/admin')
-        } else if (user.role_name === ROLE_EMPLOYEE) {
-          navigate('/employee');
-        } else if (user.role_name === ROLE_CUSTOMER) {
-          navigate('/find-rooms');
-        }
-        toast.success(`Welcome back ${resolve.data.user.username}`, {
+        // const user = resolve.data.user;
+        // setToken(user, resolve.data.access_token, user.role_name);
+        //   if (user.role_name === ROLE_ADMIN) {
+        //   navigate('/admin')
+        // } else if (user.role_name === ROLE_EMPLOYEE) {
+        //   navigate('/employee');
+        // } else if (user.role_name === ROLE_CUSTOMER) {
+        //   navigate('/find-rooms');
+        // }
+        toast.success(`Welcome back`, {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,

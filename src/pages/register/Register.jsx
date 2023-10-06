@@ -54,21 +54,24 @@ const Register = () => {
   const [form] = Form.useForm();
   
   const onFinish = (values) => {
-    const ENABLED_ACCOUNT = 1;
-    const ROLE_CUSTOMER_ID = 3;
-    const DEFAULT_USER_AVATAR = 'gs://ltd-resort.appspot.com/avatars/default-user-icon.jpg';
+    const ENABLED_ACCOUNT = 'active';
+    const ROLE_USER = 'user';
+    // const DEFAULT_USER_AVATAR = 'gs://ltd-resort.appspot.com/avatars/default-user-icon.jpg';
+    const DEFAULT_USER_AVATAR = null;
 
     const formData = new FormData();
     
-    formData.append('username', values.username);
+    // formData.append('username', values.username);
     formData.append('email', values.email);
     formData.append('password', values.password);
     formData.append('confirm_password', values.confirmPassword);
-    formData.append('avatar', DEFAULT_USER_AVATAR)
-    formData.append('enabled', ENABLED_ACCOUNT);
-    formData.append('role_id', ROLE_CUSTOMER_ID);
+    // formData.append('avatar', DEFAULT_USER_AVATAR)
+    // formData.append('status', ENABLED_ACCOUNT);
+    // formData.append('role', ROLE_USER);
 
-    http.post('/auth/register', formData)
+    console.log(formData)
+
+    http.post('/register', formData)
       .then((resolve) => {
         console.log(resolve);
         Swal.fire(
@@ -80,63 +83,17 @@ const Register = () => {
         })
       })
       .catch((reject) => {
-        const { username, email, password, confirm_password } = reject.response.data.message;
-        if (username !== "") {
-          toast.error(username, {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          })
-        } else if (email !== "") {
-          toast.error(email, {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          })
-        } else if (password !== "") {
-          toast.error(password, {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          })
-        } else if (confirm_password !== "") {
-          toast.error(confirm_password, {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          })
-        } else {
-          toast.error('Oops. Try again', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          })
-        }
+        console.log(reject)
+        toast.error('Oops. Try Again', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        })
       })
   };
 
@@ -167,7 +124,7 @@ const Register = () => {
           <div className={cx("register-container__main")}>
             <div>
               <h1 className={cx("title")}>Sign up</h1>
-              <p className={cx("title-description")}>Let's sign up and make a wonderful journey!</p>
+              <p className={cx("title-description")}>Let's sign up and make a wonderful blog!</p>
             </div>
             <div>
               <Form
