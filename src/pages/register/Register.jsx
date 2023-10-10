@@ -54,26 +54,20 @@ const Register = () => {
   const [form] = Form.useForm();
   
   const onFinish = (values) => {
-    const ENABLED_ACCOUNT = 'active';
-    const ROLE_USER = 'user';
-    // const DEFAULT_USER_AVATAR = 'gs://ltd-resort.appspot.com/avatars/default-user-icon.jpg';
-    const DEFAULT_USER_AVATAR = null;
+    const DEFAULT_USER_AVATAR = 'gs://ltd-resort.appspot.com/avatars/default-user-icon.jpg';
 
     const formData = new FormData();
     
-    // formData.append('username', values.username);
+    formData.append('username', values.username);
     formData.append('email', values.email);
     formData.append('password', values.password);
     formData.append('confirm_password', values.confirmPassword);
-    // formData.append('avatar', DEFAULT_USER_AVATAR)
-    // formData.append('status', ENABLED_ACCOUNT);
-    // formData.append('role', ROLE_USER);
+    formData.append('avatar', DEFAULT_USER_AVATAR)
 
-    console.log(formData)
-
-    http.post('/register', formData)
+    http.post('/auth/register/', formData)
       .then((resolve) => {
         console.log(resolve);
+        
         Swal.fire(
           'Created!',
           'You have successfully registered an account',

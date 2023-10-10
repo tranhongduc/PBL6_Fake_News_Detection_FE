@@ -47,43 +47,60 @@ const Login = () => {
   const handleCancel = () => {
     setIsModalOpen(false);
   }
-  
+
   const navigate = useNavigate();
 
-  const { http, setToken } = AuthUser();  
+  const { http, saveToken, refreshToken, setAuthorizationHeader } = AuthUser();
   const [form] = Form.useForm();
-  const ROLE_ADMIN = "ROLE_ADMIN";
-  const ROLE_EMPLOYEE = "ROLE_EMPLOYEE";
-  const ROLE_CUSTOMER = "ROLE_CUSTOMER";
+  const ROLE_ADMIN = "admin";
+  const ROLE_USER = "user";
 
   const onFinish = (values) => {
     const formData = new FormData();
-    
+
     formData.append('email', values.email);
     formData.append('password', values.password);
 
-    http.post('/login', formData)
+    if (refreshToken != null) {
+      setAuthorizationHeader(refreshToken)
+    }
+
+    console.log('Previous refresh token: ', http.defaults.headers.common["Authorization"])
+
+    http.post('/auth/login/', formData)
       .then((resolve) => {
         console.log(resolve);
-        // const user = resolve.data.user;
-        // setToken(user, resolve.data.access_token, user.role_name);
-        //   if (user.role_name === ROLE_ADMIN) {
-        //   navigate('/admin')
-        // } else if (user.role_name === ROLE_EMPLOYEE) {
-        //   navigate('/employee');
-        // } else if (user.role_name === ROLE_CUSTOMER) {
-        //   navigate('/find-rooms');
-        // }
-        toast.success(`Welcome back`, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        })
+
+        const { access_token, refresh_token } = resolve.data;
+        saveToken(access_token, refresh_token)
+
+        const user = resolve.data.user;
+
+        if (user.role === ROLE_ADMIN) {
+          // navigate('/admin')
+          toast.success(`Welcome back admin ${user.username}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
+        } else if (user.role === ROLE_USER) {
+          // navigate('/find-rooms');
+          toast.success(`Welcome back user ${user.username}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
+        }
       })
       .catch((reject) => {
         console.log(reject);
@@ -218,7 +235,7 @@ const Login = () => {
             </Divider>
             <div className={cx("social-media")}>
               <a href="/" className={cx("social-media__link")}>
-                <Button 
+                <Button
                   className={cx("social-media__button")}
                   onClick={(e) => handleLoginBySocial(e)}
                 >
@@ -226,7 +243,7 @@ const Login = () => {
                 </Button>
               </a>
               <a href="/" className={cx("social-media__link")}>
-                <Button 
+                <Button
                   className={cx("social-media__button")}
                   onClick={(e) => handleLoginBySocial(e)}
                 >
@@ -250,8 +267,8 @@ const Login = () => {
         ]}
       >
         <div className={cx("wrapper__modal")}>
-            <h1 style={{textAlign: 'center'}}>We will soon complete this feature (◍•ᴗ•◍)♡ ✧*</h1>
-            <img src={gif_cat} alt="Cat meowwing" width={80} />
+          <h1 style={{ textAlign: 'center' }}>We will soon complete this feature (◍•ᴗ•◍)♡ ✧*</h1>
+          <img src={gif_cat} alt="Cat meowwing" width={80} />
         </div>
       </Modal>
     </div>

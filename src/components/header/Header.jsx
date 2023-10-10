@@ -9,13 +9,16 @@ import { Divider, Popover } from 'antd'
 import { FaUser } from 'react-icons/fa'
 import { FiLogOut } from 'react-icons/fi'
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import AuthUser from "../../utils/AuthUser";
 
 const cx = classNames.bind(styles);
 
 const Header = () => {
+
+  const { logout } = AuthUser(); 
   
   const handleLogout = () => {
-
+    logout()
   }
 
   const title = (

@@ -8,44 +8,42 @@ import { toast } from "react-toastify";
 export default function AuthUser() {
     const navigate = useNavigate();
 
-    const getToken = () => {
-        const tokenString = sessionStorage.getItem('access_token');
-        const userToken = JSON.parse(tokenString);
-        return userToken;
+    const getAccessToken = () => {
+        const accessTokenString = localStorage.getItem('access_token');
+        const accessToken = JSON.parse(accessTokenString);
+        return accessToken;
     }
 
-    const getUser = () => {
-        const userString = sessionStorage.getItem('user');
-        const userDetail = JSON.parse(userString);
-        return userDetail;
+    const getRefreshToken = () => {
+        const refreshTokenString = localStorage.getItem('refresh_token');
+        const refreshToken = JSON.parse(refreshTokenString);
+        return refreshToken;
     }
 
-    const getRole = () => {
-        const roleString = sessionStorage.getItem('role');
-        const userRole = JSON.parse(roleString);
-        return userRole;
+    const hasAccessToken = () => {
+        const accessTokenString = localStorage.getItem('access_token');
+        return !!accessTokenString
     }
 
-    const [token, setToken] = useState(getToken());
-    const [user, setUser] = useState(getUser());
-    const [role, setRole] = useState(getRole());
+    const hasRefreshToken = () => {
+        const refreshTokenString = localStorage.getItem('refresh_token');
+        return !!refreshTokenString
+    }
+
+    const [accessToken, setAccessToken] = useState(getAccessToken());
+    const [refreshToken, setRefreshToken] = useState(getRefreshToken());
     const dispatch = useDispatch();
 
-    const saveToken = (user, token, role) => {
-        sessionStorage.setItem('access_token', JSON.stringify(token));
-        sessionStorage.setItem('user', JSON.stringify(user));
-        sessionStorage.setItem('role', JSON.stringify(role));
+    const saveToken = (accessToken, refreshToken) => {
+        localStorage.setItem('access_token', JSON.stringify(accessToken));
+        localStorage.setItem('refresh_token', JSON.stringify(refreshToken));
 
-        setToken(token);
-        setUser(user);
-        setRole(role);
-
-        console.log(role);
+        setAccessToken(accessToken);
+        setRefreshToken(refreshToken);
     }
 
     const logout = () => {
-        sessionStorage.clear();
-        localStorage.clear();
+        localStorage.removeItem('access_token');
         dispatch(removeAvatar(''));
         navigate('/login')
         toast.success('Logout successful!', {
@@ -63,18 +61,24 @@ export default function AuthUser() {
     const http = axios.create({
         baseURL: "http://127.0.0.1:8000/",
         headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
+            "Content-Type": 'multipart/form-data'
         }
     })
 
+    const setAuthorizationHeader = (token) => {
+        http.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+
     return {
-        setToken:saveToken,
-        token,
-        user,
-        role,
-        getToken,
-        logout,
         http,
+        accessToken,
+        refreshToken,
+        getAccessToken,
+        getRefreshToken,
+        hasAccessToken,
+        hasRefreshToken,
+        setAuthorizationHeader,
+        saveToken,
+        logout,
     }
 }
