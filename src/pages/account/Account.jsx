@@ -1,28 +1,31 @@
 import React from "react"
-import image from "../../assets/images/input.png"
-import "./account.css"
+import avatar from "../../assets/images/avatar.png"
+import styles from './Account.module.scss'
+import classNames from "classnames/bind";
 
-export const Account = () => {
+const cx = classNames.bind(styles);
+
+const Account = () => {
   return (
     <>
-      <section className='accountInfo'>
-        <div className='container boxItems'>
+      <section className={cx("accountInfo")}>
+        <div className={cx("container boxItems")}>
           <h1>Account Information</h1>
-          <div className='content'>
-            <div className='left'>
-              <div className='img flexCenter'>
-                <input type='file' accept='image/*' src={image} alt='img' />
-                <img src={image} alt='image' class='image-preview' />
+          <div className={cx("content")}>
+            <div className={cx("left")}>
+              <div className={cx("img flexCenter")}>
+                <input type='file' accept='image/*' src={avatar} alt='img' />
+                <img src={avatar} alt='image' class='image-preview' />
               </div>
             </div>
-            <div className='right'>
+            <div className={cx("right")}>
               <label htmlFor=''>Username</label>
               <input type='text' />
               <label htmlFor=''>Email</label>
               <input type='email' />
               <label htmlFor=''>Password</label>
               <input type='password' />
-              <button className='button'>Update</button>
+              <button className={cx("button")}>Update</button>
             </div>
           </div>
         </div>
@@ -30,3 +33,5 @@ export const Account = () => {
     </>
   )
 }
+
+export default Account

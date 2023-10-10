@@ -1,0 +1,64 @@
+@mixin animate($animation, $duration, $method, $times) {
+    animation: $animation $duration $method $times;
+}
+
+@mixin keyframes($name){
+    @keyframes #{$name}{
+        @content;
+    }
+}
+
+.slider {
+    position: relative;
+    height: 88%;
+    width: 33%;
+    border-radius: 30px;
+    position: relative;
+}
+
+.left-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    left: 32px;
+    font-size: 45px;
+    color: #FF7E00;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.right-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    right: 32px;
+    font-size: 45px;
+    color: #FF7E00;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.slide {
+    width: 100%;
+    height: 100%;
+    border-radius: 30px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: rgba(149, 157, 165, 0.7) 0px 8px 24px;
+}
+
+.dot-container {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dot {
+    margin: 0 4px;
+    cursor: pointer;
+    font-size: 24px;
+    color: #8dd3bb;
+}
