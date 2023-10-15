@@ -4,7 +4,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 25px 50px;
+    padding: 20px 40px;
     box-shadow: rgba(149, 157, 165, 0.7) 0px 8px 24px;
 
     &__left {
@@ -215,6 +215,31 @@
             opacity: 0.9;
             background-color: #e3dada;
         }
+    }
+}
+
+.btn-login {
+    color: #fff;
+    font-weight: 500;
+    background-color: #ff8682;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    transition: 0.3s;
+
+    &__title {
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 2px;
+        margin-left: 8px;
+        border-bottom: none;
+    }
+
+    &:hover {
+        cursor: pointer;
+        background-color: #ff8682;
+        color: #fff;
+        opacity: 0.8;
     }
 }
 

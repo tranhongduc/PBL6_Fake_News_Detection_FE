@@ -57,8 +57,8 @@ const Category = () => {
       <div className={cx("content")}>
         <Slider {...settings}>
           {category.map((item) => (
-            <div className={cx("boxs")}>
-              <div className={cx("box")} key={item.id}>
+            <div className={cx("boxs")} key={item.id}>
+              <div className={cx("box")}>
                 <img src={item.cover} alt='cover' />
                 <div className={cx("overlay")}>
                   <h4>{item.category}</h4>

@@ -8,18 +8,6 @@ import { toast } from "react-toastify";
 export default function AuthUser() {
     const navigate = useNavigate();
 
-    const getAccessToken = () => {
-        const accessTokenString = localStorage.getItem('access_token');
-        const accessToken = JSON.parse(accessTokenString);
-        return accessToken;
-    }
-
-    const getRefreshToken = () => {
-        const refreshTokenString = localStorage.getItem('refresh_token');
-        const refreshToken = JSON.parse(refreshTokenString);
-        return refreshToken;
-    }
-
     const hasAccessToken = () => {
         const accessTokenString = localStorage.getItem('access_token');
         return !!accessTokenString
@@ -30,8 +18,29 @@ export default function AuthUser() {
         return !!refreshTokenString
     }
 
-    const [accessToken, setAccessToken] = useState(getAccessToken());
-    const [refreshToken, setRefreshToken] = useState(getRefreshToken());
+    const hasUsername = () => {
+        const usernameString = localStorage.getItem('username');
+        return !!usernameString
+    }
+
+    const [accessToken, setAccessToken] = useState(() => {
+        const accessTokenString = localStorage.getItem('access_token');
+        const accessToken = JSON.parse(accessTokenString);
+        return accessToken;
+    });
+
+    const [refreshToken, setRefreshToken] = useState(() => {
+        const refreshTokenString = localStorage.getItem('refresh_token');
+        const refreshToken = JSON.parse(refreshTokenString);
+        return refreshToken;
+    });
+
+    const [username, setUsername] = useState(() => {
+        const usernameString = localStorage.getItem('username');
+        const username = JSON.parse(usernameString);
+        return username;
+    });
+
     const dispatch = useDispatch();
 
     const saveToken = (accessToken, refreshToken) => {
@@ -40,6 +49,12 @@ export default function AuthUser() {
 
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
+    }
+
+    const saveUsername = (username) => {
+        localStorage.setItem('username', JSON.stringify(username));
+
+        setUsername(username);
     }
 
     const logout = () => {
@@ -71,14 +86,15 @@ export default function AuthUser() {
 
     return {
         http,
+        username,
         accessToken,
         refreshToken,
-        getAccessToken,
-        getRefreshToken,
         hasAccessToken,
         hasRefreshToken,
+        hasUsername,
         setAuthorizationHeader,
         saveToken,
+        saveUsername,
         logout,
     }
 }

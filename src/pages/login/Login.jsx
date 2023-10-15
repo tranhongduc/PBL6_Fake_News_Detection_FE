@@ -50,7 +50,7 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const { http, saveToken, refreshToken, setAuthorizationHeader } = AuthUser();
+  const { http, refreshToken, saveToken, saveUsername, setAuthorizationHeader } = AuthUser();
   const [form] = Form.useForm();
   const ROLE_ADMIN = "admin";
   const ROLE_USER = "user";
@@ -65,19 +65,16 @@ const Login = () => {
       setAuthorizationHeader(refreshToken)
     }
 
-    console.log('Previous refresh token: ', http.defaults.headers.common["Authorization"])
-
     http.post('/auth/login/', formData)
       .then((resolve) => {
         console.log(resolve);
 
         const { access_token, refresh_token } = resolve.data;
-        saveToken(access_token, refresh_token)
-
         const user = resolve.data.user;
+        saveToken(access_token, refresh_token)
+        saveUsername(user.username)
 
         if (user.role === ROLE_ADMIN) {
-          // navigate('/admin')
           toast.success(`Welcome back admin ${user.username}`, {
             position: "top-right",
             autoClose: 3000,
@@ -89,8 +86,8 @@ const Login = () => {
             theme: "colored",
           })
         } else if (user.role === ROLE_USER) {
-          // navigate('/find-rooms');
-          toast.success(`Welcome back user ${user.username}`, {
+          navigate('/')
+          toast.success(`Welcome back ${user.username}`, {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
