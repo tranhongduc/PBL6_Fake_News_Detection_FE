@@ -1,16 +1,7 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Topbar from "./scenes/global/Topbar";
-import Sidebar from "./scenes/global/Sidebar";
-import Dashboard from "./scenes/dashboard";
-import Team from "./scenes/team";
-import Invoices from "./scenes/invoices";
-import Contacts from "./scenes/contacts";
-import Bar from "./scenes/bar";
-import Line from "./scenes/line";
-import Pie from "./scenes/pie";
-import FAQ from "./scenes/faq";
-import Geography from "./scenes/geography";
+import Topbar from "./scenes/Topbar/Topbar";
+import Sidebar from "./scenes/Sidebar/Sidebar";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import { Outlet } from "react-router-dom";
@@ -23,10 +14,10 @@ function AdminPage() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div className="app_admin">
+        <div className="app_admin" style={{ display: "flex" }}>
           <Sidebar isSidebar={isSidebar} />
 
-          <main className="content_admin">
+          <main className="content_admin" style={{ width: "100%" }}>
             <Topbar setIsSidebar={setIsSidebar} />
             {/* side bar */}
 
