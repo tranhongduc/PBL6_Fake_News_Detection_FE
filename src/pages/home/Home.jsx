@@ -1,13 +1,20 @@
 import React from "react"
-import { Card } from "../../components/blog/Card"
-import { Category } from "../../components/category/Category"
+import styles from './Home.module.scss'
+import classNames from "classnames/bind";
+import Category from '../../components/category/Category';
+import Blog from "../../components/blog/Blog";
+import Header from "../../components/header/Header";
 
-export const Home = () => {
+const cx = classNames.bind(styles);
+
+const Home = () => {
   return (
-    <>
-      {/*  <Slider />*/}
+    <div className={cx("home")}>
+      <Header />
       <Category />
-      <Card />
-    </>
+      <Blog />
+    </div>
   )
 }
+
+export default Home

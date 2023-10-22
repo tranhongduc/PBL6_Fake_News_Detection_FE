@@ -1,0 +1,53 @@
+/* accountInfo.module.scss */
+.accountInfo {
+  margin: 115px 0;
+
+  .container {
+    padding: 50px;
+    max-width: 60%;
+    margin: auto;
+
+    .content {
+      margin-top: 80px;
+      display: flex;
+      justify-content: flex-start;
+
+      .left {
+        width: 150px;
+        position: relative;
+
+        .img {
+          img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 150px;
+            height: 150px;
+            z-index: 1;
+            border-radius: 50%;
+          }
+
+          input {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+          }
+        }
+      }
+
+      .right {
+        width: calc(100% - 180px);
+        margin-left: 50px;
+
+        label {
+          font-size: 17px;
+          color: #000;
+          margin-bottom: 10px;
+          display: block;
+        }
+      }
+    }
+  }
+}

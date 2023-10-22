@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import styles from './Login.module.scss'
-import classNames from "classnames/bind";
+import styles from './Register.module.scss'
+import classNames from 'classnames/bind'
 import logo from "../../assets/images/logo.svg"
 import facebookIcon from '../../assets/images/facebook.png'
 import googleIcon from '../../assets/images/google.png'
@@ -8,15 +8,16 @@ import gif_cat from '../../assets/images/cat.gif'
 import carousel1 from '../../assets/images/carousel1.png'
 import carousel2 from '../../assets/images/carousel2.png'
 import carousel3 from '../../assets/images/carousel3.png'
-import { Form, Button, Checkbox, Input, Divider, Modal } from 'antd'
 import ImageSlider from '../../components/imageSlider/ImageSlider';
-import { Link, useNavigate } from 'react-router-dom';
+import { Form, Button, Input, Divider, Modal } from 'antd'
+import { Link, useNavigate } from 'react-router-dom'
 import AuthUser from '../../utils/AuthUser';
-import { toast } from 'react-toastify';
+import Swal from 'sweetalert2'
+import { toast } from 'react-toastify'
 
 const cx = classNames.bind(styles);
 
-const Login = () => {
+const Register = () => {
 
   const slides = [
     { url: carousel1, title: 'Carousel 1' },
@@ -24,7 +25,7 @@ const Login = () => {
     { url: carousel3, title: 'Carousel 3' },
   ]
 
-  const loginFormLayout = {
+  const registerFormLayout = {
     labelCol: {
       span: 8
     },
@@ -47,47 +48,43 @@ const Login = () => {
   const handleCancel = () => {
     setIsModalOpen(false);
   }
-  
+
+  const { http } = AuthUser(); 
   const navigate = useNavigate();
-
-  const { http, setToken } = AuthUser();  
   const [form] = Form.useForm();
-  const ROLE_ADMIN = "ROLE_ADMIN";
-  const ROLE_EMPLOYEE = "ROLE_EMPLOYEE";
-  const ROLE_CUSTOMER = "ROLE_CUSTOMER";
-
+  
   const onFinish = (values) => {
+    const ENABLED_ACCOUNT = 'active';
+    const ROLE_USER = 'user';
+    // const DEFAULT_USER_AVATAR = 'gs://ltd-resort.appspot.com/avatars/default-user-icon.jpg';
+    const DEFAULT_USER_AVATAR = null;
+
     const formData = new FormData();
     
+    // formData.append('username', values.username);
     formData.append('email', values.email);
     formData.append('password', values.password);
+    formData.append('confirm_password', values.confirmPassword);
+    // formData.append('avatar', DEFAULT_USER_AVATAR)
+    // formData.append('status', ENABLED_ACCOUNT);
+    // formData.append('role', ROLE_USER);
 
-    http.post('/login', formData)
+    console.log(formData)
+
+    http.post('/register', formData)
       .then((resolve) => {
         console.log(resolve);
-        // const user = resolve.data.user;
-        // setToken(user, resolve.data.access_token, user.role_name);
-        //   if (user.role_name === ROLE_ADMIN) {
-        //   navigate('/admin')
-        // } else if (user.role_name === ROLE_EMPLOYEE) {
-        //   navigate('/employee');
-        // } else if (user.role_name === ROLE_CUSTOMER) {
-        //   navigate('/find-rooms');
-        // }
-        toast.success(`Welcome back`, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
+        Swal.fire(
+          'Created!',
+          'You have successfully registered an account',
+          'success'
+        ).then(() => {
+          navigate('/login');
         })
       })
       .catch((reject) => {
-        console.log(reject);
-        toast.error('Email or password is incorrect..', {
+        console.log(reject)
+        toast.error('Oops. Try Again', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -101,8 +98,8 @@ const Login = () => {
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-    toast.error('Please input all fields', {
+    console.log('Failed: ', errorInfo);
+    toast.error('Please input all fields!', {
       position: "top-right",
       autoClose: 3000,
       hideProgressBar: false,
@@ -117,33 +114,47 @@ const Login = () => {
   return (
     <div className={cx("wrapper")}>
       <div className={cx("wrapper__left")}>
-        <div className={cx("login-container")}>
-          <div className={cx("login-container__logo")}>
-            <Link to='/'>
-              <img src={logo} alt='Logo' width={100} height={54} />
-            </Link>
-          </div>
-          <div className={cx("login-container__main")}>
+        <ImageSlider slides={slides} parentWidth={600} />
+      </div>
+      <div className={cx("wrapper__right")}>
+        <div className={cx("register-container")}>
+          <Link to='/'>
+            <img src={logo} alt='Logo' width={100} height={54} />
+          </Link>
+          <div className={cx("register-container__main")}>
             <div>
-              <h1 className={cx("title")}>Login</h1>
-              <p className={cx("title-description")}>Login to access most amazing blogger system!</p>
+              <h1 className={cx("title")}>Sign up</h1>
+              <p className={cx("title-description")}>Let's sign up and make a wonderful blog!</p>
             </div>
-            <div className={cx("form-container")}>
+            <div>
               <Form
-                {...loginFormLayout}
+                {...registerFormLayout}
                 form={form}
                 layout='vertical'
-                name='login_form'
+                name='register_form'
                 labelAlign='left'
                 labelWrap='true'
                 size='large'
                 autoComplete="off"
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
-                initialValues={{
-                  remember: true,
-                }}
               >
+                <Form.Item
+                  label="Username"
+                  name="username"
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Username is required!',
+                    },
+                  ]}
+                  hasFeedback
+                >
+                  <Input
+                    placeholder='John Doe'
+                    autoComplete='username'
+                  />
+                </Form.Item>
                 <Form.Item
                   label="Email"
                   name="email"
@@ -161,7 +172,6 @@ const Login = () => {
                 >
                   <Input
                     placeholder='john.doe@gmail.com'
-                    autoComplete='email'
                   />
                 </Form.Item>
                 <Form.Item
@@ -177,35 +187,46 @@ const Login = () => {
                 >
                   <Input.Password
                     placeholder='******'
-                    autoComplete='current-password'
+                    autoComplete='new-password'
                   />
                 </Form.Item>
                 <Form.Item
-                  name="remember"
-                  valuePropName="checked"
-                  wrapperCol={{
-                    span: 12,
-                  }}
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  dependencies={['password']}
+                  hasFeedback
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Please confirm your password!',
+                    },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue('password') === value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                      },
+                    }),
+                  ]}
                 >
-                  <Checkbox>Remember me</Checkbox>
+                  <Input.Password 
+                    placeholder='******'
+                    autoComplete='new-password'
+                  />
                 </Form.Item>
-                <p className={cx("forgot__password")}>
-                  <Link to="/forgot-password" className={cx("forgot__password__link")}>
-                    Forgot Password
-                  </Link>
-                </p>
                 <Form.Item wrapperCol={{ span: 24 }}>
                   <Button type="primary" htmlType="submit" className={cx("button")}>
-                    Login
+                    Sign up
                   </Button>
                 </Form.Item>
               </Form>
             </div>
-            <div className={cx("signup")}>
-              <div className={cx("signup__title")}>Don't have an account yet?</div>
+            <div className={cx("login")}>
+              <div className={cx("login__title")}>Already have an account yet?</div>
               <div>
-                <Link to="/register" className={cx("signup__link")}>
-                  Sign up here
+                <Link to="/login" className={cx("login__link")}>
+                  Login here
                 </Link>
               </div>
             </div>
@@ -214,7 +235,7 @@ const Login = () => {
               orientation='center'
               className={cx("seperate-line")}
             >
-              Or login with
+              Or sign up with
             </Divider>
             <div className={cx("social-media")}>
               <a href="/" className={cx("social-media__link")}>
@@ -237,9 +258,6 @@ const Login = () => {
           </div>
         </div>
       </div>
-      <div className={cx("wrapper__right")}>
-        <ImageSlider slides={slides} parentWidth={600} />
-      </div>
       <Modal
         title="Feature under development"
         open={isModalOpen}
@@ -258,4 +276,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Register

@@ -2,7 +2,7 @@ import React from "react"
 import "./create.css"
 import { IoIosAddCircleOutline } from "react-icons/io"
 
-export const Create = () => {
+const Create = () => {
   return (
     <>
       <section className='newPost'>
@@ -25,3 +25,5 @@ export const Create = () => {
     </>
   )
 }
+
+export default Create
