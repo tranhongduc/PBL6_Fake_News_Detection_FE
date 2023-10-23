@@ -85,78 +85,54 @@ const App = () => {
           <Route
             path="/admin"
             element={
-              <AdminRoute
-                element={
-                  <Suspense fallback={<Loading />}>
-                    <DashBoard />
-                  </Suspense>
-                }
-              />
+              <Suspense fallback={<Loading />}>
+                <DashBoard />
+              </Suspense>
             }
           />
           <Route
             path="/admin/user"
             element={
-              <AdminRoute
-                element={
-                  <Suspense fallback={<Loading />}>
-                    <User />
-                  </Suspense>
-                }
-              />
+              <Suspense fallback={<Loading />}>
+                <User />
+              </Suspense>
             }
           />
           <Route
             path="/admin/view_user"
             element={
-              <AdminRoute
-                element={
-                  <Suspense fallback={<Loading />}>
-                    <ViewUser />
-                  </Suspense>
-                }
-              />
+              <Suspense fallback={<Loading />}>
+                <ViewUser />
+              </Suspense>
             }
           />
           <Route
             path="/admin/category"
             element={
-              <AdminRoute
-                element={
-                  <Suspense fallback={<Loading />}>
-                    <Category />
-                  </Suspense>
-                }
-              />
+              <Suspense fallback={<Loading />}>
+                <Category />
+              </Suspense>
             }
           />
           <Route
             path="/admin/news"
             element={
-              <AdminRoute
-                element={
-                  <Suspense fallback={<Loading />}>
-                    <News />
-                  </Suspense>
-                }
-              />
+              <Suspense fallback={<Loading />}>
+                <News />
+              </Suspense>
             }
           />
           <Route
             path="/admin/manage"
             element={
-              <AdminRoute
-                element={
-                  <Suspense fallback={<Loading />}>
-                    <Admin />
-                  </Suspense>
-                }
-              />
+              <Suspense fallback={<Loading />}>
+                <Admin />
+              </Suspense>
             }
           />
         </Routes>
       </BrowserRouter>
-      <Routes>
+      {/* <Routes>
         <Route path='/' element={<Default />} >
           <Route index element={<Home />} />
           <Route path='details/:id' element={<DetailsPages />} />
@@ -171,7 +147,7 @@ const App = () => {
           <Route path="news" element={<News />} />
           <Route path="manage" element={<Admin />} />
         </Route>
-      </Routes>
+      </Routes> */}
       <ToastContainer />
     </div>
   )
