@@ -12,6 +12,18 @@ const DetailsPages = lazy(() => import("./pages/details/DetailsPages"));
 const Account = lazy(() => import("./pages/account/Account"));
 const Create = lazy(() => import("./components/create/Create"));
 const Login = lazy(() => import("./pages/login/Login"));
+const DashBoard = lazy(() => import("./pages/admin/scenes/dashboard/dashboard"));
+const Team = lazy(() => import("./pages/admin/u/team"));
+const Contacts = lazy(() => import("./pages/admin/u/contacts"));
+const Invoices = lazy(() => import("./pages/admin/u/invoices"));
+const ViewUser = lazy(() => import("./pages/admin/scenes/ViewUser/ViewUser"));
+const User = lazy(() => import("./pages/admin/scenes/User/User"));
+const Category = lazy(() => import("./pages/admin/scenes/Category/Category"));
+const News = lazy(() => import("./pages/admin/scenes/News/News"));
+const AdminPage = lazy(() => import("./pages/admin/admin"));
+const Admin = lazy(() => import("./pages/admin/scenes/Admin/Admin"));
+const Default = lazy(() => import("./pages/Default"));
+
 
 const App = () => {
   return (
@@ -20,7 +32,7 @@ const App = () => {
         <ScrollToTop />
         <Routes>
           {/* public routes */}
-          <Route 
+          <Route
             path='/'
             element={
               <Suspense fallback={<Loading />}>
@@ -28,15 +40,15 @@ const App = () => {
               </Suspense>
             }
           />
-          <Route 
-            path='/login' 
+          <Route
+            path='/login'
             element={
               <Suspense fallback={<Loading />}>
                 <Login />
               </Suspense>
             }
           />
-          <Route 
+          <Route
             path='/register'
             element={
               <Suspense fallback={<Loading />}>
@@ -44,7 +56,7 @@ const App = () => {
               </Suspense>
             }
           />
-          <Route 
+          <Route
             path='/details/:id'
             element={
               <Suspense fallback={<Loading />}>
@@ -52,7 +64,7 @@ const App = () => {
               </Suspense>
             }
           />
-          <Route 
+          <Route
             path='/account'
             element={
               <Suspense fallback={<Loading />}>
@@ -60,7 +72,7 @@ const App = () => {
               </Suspense>
             }
           />
-          <Route 
+          <Route
             path='/create'
             element={
               <Suspense fallback={<Loading />}>
@@ -68,11 +80,100 @@ const App = () => {
               </Suspense>
             }
           />
+
+          {/* admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <DashBoard />
+                  </Suspense>
+                }
+              />
+            }
+          />
+          <Route
+            path="/admin/user"
+            element={
+              <AdminRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <User />
+                  </Suspense>
+                }
+              />
+            }
+          />
+          <Route
+            path="/admin/view_user"
+            element={
+              <AdminRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <ViewUser />
+                  </Suspense>
+                }
+              />
+            }
+          />
+          <Route
+            path="/admin/category"
+            element={
+              <AdminRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <Category />
+                  </Suspense>
+                }
+              />
+            }
+          />
+          <Route
+            path="/admin/news"
+            element={
+              <AdminRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <News />
+                  </Suspense>
+                }
+              />
+            }
+          />
+          <Route
+            path="/admin/manage"
+            element={
+              <AdminRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <Admin />
+                  </Suspense>
+                }
+              />
+            }
+          />
         </Routes>
       </BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Default />} >
+          <Route index element={<Home />} />
+          <Route path='details/:id' element={<DetailsPages />} />
+          <Route path='account' element={<Account />} />
+          <Route path='create' element={<Create />} />
+        </Route>
+        <Route path='admin' element={<AdminPage />} >
+          <Route index element={<Dashboard />} />
+          <Route path="user" element={<User />} />
+          <Route path="view_user" element={<ViewUser />} />
+          <Route path="category" element={<Category />} />
+          <Route path="news" element={<News />} />
+          <Route path="manage" element={<Admin />} />
+        </Route>
+      </Routes>
       <ToastContainer />
     </div>
   )
 }
-
 export default App
