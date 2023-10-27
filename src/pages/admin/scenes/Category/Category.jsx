@@ -10,11 +10,14 @@ import Header from "../../components/Header";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../../../../axios";
+import AuthUser from "../../../../utils/AuthUser";
 
 const Category = () => {
+  const { http } = AuthUser();
   const navigate = useNavigate();
   const theme = useTheme();
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState([]);
+  const [category, setCategory] = useState([]);
   const colors = tokens(theme.palette.mode);
   const columns = [
     { field: "id", headerName: "ID" },
@@ -22,80 +25,37 @@ const Category = () => {
       field: "name",
       headerName: "Name",
       flex: 1,
-      cellClassName: "name-column--cell",
     },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "phone",
-      headerName: "Phone Number",
+      field: "news_count",
+      headerName: "News Count",
       flex: 1,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-    },
-    {
-      field: "accessLevel",
-      headerName: "Access Level",
-      flex: 1,
-      renderCell: ({ row: { access } }) => {
-        return (
-          <Box
-            width="60%"
-            m="0 auto"
-            p="5px"
-            display="flex"
-            justifyContent="center"
-            backgroundColor={
-              access === "admin"
-                ? colors.greenAccent[600]
-                : access === "manager"
-                ? colors.greenAccent[700]
-                : colors.greenAccent[700]
-            }
-            borderRadius="4px"
-          >
-            {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
-            {access === "manager" && <SecurityOutlinedIcon />}
-            {access === "user" && <LockOpenOutlinedIcon />}
-            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
-            </Typography>
-          </Box>
-        );
-      },
     },
   ];
 
   const handleDoubleClickCell = async (params) => {
     const { row } = params;
     console.log(row);
+    navigate("/admin/view_category", { state: row });
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await axiosClient.get("admin/categories_list/");
-        console.log("aa", response);
-        if (response.status === 200) {
-          setData(response.data.categories);
-        } else {
-          console.error("Request failed with status:", response.status);
-        }
-      } catch (error) {
-        console.error("An error occurred:", error);
-      }
+      await http
+        .get(`/admin/categories_list/`)
+        .then((resolve) => {
+          console.log(resolve);
+          setCategory(resolve.data.categories);
+          console.log(category);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
     };
     fetchData();
-  }, []);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <Box m="20px">
       <Header title="CATOGORY" subtitle="Category News" />
@@ -126,11 +86,12 @@ const Category = () => {
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
           },
+          "& .MuiDataGrid-root": { fontSize: "1.5rem" },
         }}
       >
+        {console.log("1")}
         <DataGrid
-          checkboxSelection
-          rows={mockDataTeam}
+          rows={category}
           columns={columns}
           onCellClick={handleDoubleClickCell}
         />

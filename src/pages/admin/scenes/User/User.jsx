@@ -7,78 +7,64 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import Header from "../../components/Header";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthUser from "../../../../utils/AuthUser";
 
 const User = () => {
+  const { http } = AuthUser();
   const navigate = useNavigate();
   const theme = useTheme();
+  const [user, setUser] = useState([]);
   const colors = tokens(theme.palette.mode);
   const columns = [
-    { field: "id", headerName: "ID" },
     {
-      field: "name",
-      headerName: "Name",
+      field: "id",
+      headerName: "ID",
+    },
+    {
+      field: "username",
+      headerName: "User Name",
       flex: 1,
       cellClassName: "name-column--cell",
     },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "phone",
-      headerName: "Phone Number",
-      flex: 1,
-    },
-    {
       field: "email",
       headerName: "Email",
-      flex: 1,
     },
     {
-      field: "accessLevel",
-      headerName: "Access Level",
+      field: "status",
+      headerName: "Status",
       flex: 1,
-      renderCell: ({ row: { access } }) => {
-        return (
-          <Box
-            width="60%"
-            m="0 auto"
-            p="5px"
-            display="flex"
-            justifyContent="center"
-            backgroundColor={
-              access === "admin"
-                ? colors.greenAccent[600]
-                : access === "manager"
-                ? colors.greenAccent[700]
-                : colors.greenAccent[700]
-            }
-            borderRadius="4px"
-          >
-            {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
-            {access === "manager" && <SecurityOutlinedIcon />}
-            {access === "user" && <LockOpenOutlinedIcon />}
-            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
-            </Typography>
-          </Box>
-        );
-      },
     },
   ];
 
   const handleDoubleClickCell = async (params) => {
     const { row } = params;
-    console.log(row);
+    console.log("go to user info", row);
 
     // Chuyển hướng đến trang hóa đơn
     navigate("/admin/view_user", { state: row });
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await http
+        .get(`/auth/list-user/`)
+        .then((resolve) => {
+          const dataWithIds = resolve.data.users.map((item, index) => ({
+            id: index + 1,
+            ...item,
+          }));
+          setUser(dataWithIds);
+          console.log("user  list :", resolve);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+    };
+    fetchData();
+  }, []);
 
   return (
     <Box m="20px">
@@ -110,13 +96,13 @@ const User = () => {
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
           },
+          "& .MuiDataGrid-root": { fontSize: "1.5rem" },
         }}
       >
         <DataGrid
-          checkboxSelection
-          rows={mockDataTeam}
+          rows={user}
           columns={columns}
-          onCellClick={handleDoubleClickCell}
+          onCellDoubleClick={handleDoubleClickCell}
         />
       </Box>
     </Box>

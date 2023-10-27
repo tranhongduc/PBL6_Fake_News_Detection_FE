@@ -5,6 +5,8 @@ import ScrollToTop from "./utils/ScrollToTop";
 import "react-toastify/dist/ReactToastify.css";
 import 'react-lazy-load-image-component/src/effects/blur.css';
 
+
+
 const Loading = lazy(() => import("./components/loading/Loading"));
 const Home = lazy(() => import("./pages/home/Home"));
 const Register = lazy(() => import("./pages/register/Register"));
@@ -12,16 +14,18 @@ const DetailsPages = lazy(() => import("./pages/details/DetailsPages"));
 const Account = lazy(() => import("./pages/account/Account"));
 const Create = lazy(() => import("./components/create/Create"));
 const Login = lazy(() => import("./pages/login/Login"));
-const DashBoard = lazy(() => import("./pages/admin/scenes/dashboard/dashboard"));
+const DashBoard = lazy(() => import("./pages/admin/scenes/Dashboard/Dashboard"));
 const Team = lazy(() => import("./pages/admin/u/team"));
 const Contacts = lazy(() => import("./pages/admin/u/contacts"));
 const Invoices = lazy(() => import("./pages/admin/u/invoices"));
 const ViewUser = lazy(() => import("./pages/admin/scenes/ViewUser/ViewUser"));
 const User = lazy(() => import("./pages/admin/scenes/User/User"));
 const Category = lazy(() => import("./pages/admin/scenes/Category/Category"));
+const ViewCategory = lazy(() => import("./pages/admin/scenes/ViewCategory/ViewCategory"));
 const News = lazy(() => import("./pages/admin/scenes/News/News"));
+const ViewNews = lazy(() => import("./pages/admin/scenes/ViewNews/ViewNews"));
 const AdminPage = lazy(() => import("./pages/admin/admin"));
-const Admin = lazy(() => import("./pages/admin/scenes/Admin/Admin"));
+const Admin = lazy(() => import("./pages/admin/scenes/Manage/Manage"));
 const Default = lazy(() => import("./pages/Default"));
 
 
@@ -86,50 +90,68 @@ const App = () => {
             path="/admin"
             element={
               <Suspense fallback={<Loading />}>
-                <DashBoard />
+                <AdminPage />
               </Suspense>
             }
-          />
-          <Route
-            path="/admin/user"
-            element={
-              <Suspense fallback={<Loading />}>
-                <User />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/view_user"
-            element={
-              <Suspense fallback={<Loading />}>
-                <ViewUser />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/category"
-            element={
-              <Suspense fallback={<Loading />}>
-                <Category />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/news"
-            element={
-              <Suspense fallback={<Loading />}>
-                <News />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/manage"
-            element={
-              <Suspense fallback={<Loading />}>
-                <Admin />
-              </Suspense>
-            }
-          />
+          >
+            <Route index element={<DashBoard/>}/>
+            <Route
+              path="user"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <User />
+                </Suspense>
+              }
+            />
+            <Route
+              path="view_user"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <ViewUser />
+                </Suspense>
+              }
+            />
+            <Route
+              path="category"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <Category />
+                </Suspense>
+              }
+            />
+            <Route
+              path="view_category"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <ViewCategory />
+                </Suspense>
+              }
+            />
+            <Route
+              path="news"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <News />
+                </Suspense>
+              }
+            />
+            <Route
+              path="view_news"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <ViewNews />
+                </Suspense>
+              }
+            />
+            <Route
+              path="manage"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <Admin />
+                </Suspense>
+              }
+            />
+          </Route>
         </Routes>
       </BrowserRouter>
       {/* <Routes>

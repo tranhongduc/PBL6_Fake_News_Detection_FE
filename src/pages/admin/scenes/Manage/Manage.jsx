@@ -1,4 +1,4 @@
-import "./Admin.css";
+import "./Manage.css";
 import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -6,32 +6,24 @@ import { mockDataTeam } from "../../data/mockData";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import ClearIcon from "@mui/icons-material/Clear";
+import CheckIcon from "@mui/icons-material/Check";
 import Header from "../../components/Header";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthUser from "../../../../utils/AuthUser";
 
-const Admin = () => {
+const Manage = () => {
+  const { http } = AuthUser();
   const navigate = useNavigate();
   const theme = useTheme();
+  const [adminList, setAdminList] = useState([]);
   const colors = tokens(theme.palette.mode);
   const columns = [
     { field: "id", headerName: "ID" },
     {
-      field: "name",
-      headerName: "Name",
-      flex: 1,
-      cellClassName: "name-column--cell",
-    },
-    {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "phone",
-      headerName: "Phone Number",
+      field: "username",
+      headerName: "User Name",
       flex: 1,
     },
     {
@@ -40,37 +32,36 @@ const Admin = () => {
       flex: 1,
     },
     {
-      field: "accessLevel",
-      headerName: "Access Level",
+      field: "status",
+      headerName: "Status",
       flex: 1,
-      renderCell: ({ row: { access } }) => {
-        return (
-          <Box
-            width="60%"
-            m="0 auto"
-            p="5px"
-            display="flex"
-            justifyContent="center"
-            backgroundColor={
-              access === "admin"
-                ? colors.greenAccent[600]
-                : access === "manager"
-                ? colors.greenAccent[700]
-                : colors.greenAccent[700]
-            }
-            borderRadius="4px"
-          >
-            {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
-            {access === "manager" && <SecurityOutlinedIcon />}
-            {access === "user" && <LockOpenOutlinedIcon />}
-            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
-            </Typography>
-          </Box>
-        );
+      renderCell: ({ row: { Status } }) => {
+        if (Status === "active") return <CheckIcon />;
+        else return <ClearIcon />;
       },
     },
   ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await http
+        .get(`/auth/list-admin/`)
+        .then((resolve) => {
+          console.log(resolve);
+          const dataWithIds = resolve.data.admin_users.map((item, index) => ({
+            id: index + 1,
+            ...item,
+          }));
+          setAdminList(dataWithIds);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+    };
+    fetchData();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDoubleClickCell = async (params) => {
     const { row } = params;
@@ -107,11 +98,11 @@ const Admin = () => {
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
           },
+          "& .MuiDataGrid-root": { fontSize: "1.5rem" },
         }}
       >
         <DataGrid
-          checkboxSelection
-          rows={mockDataTeam}
+          rows={adminList}
           columns={columns}
           onCellClick={handleDoubleClickCell}
         />
@@ -120,4 +111,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default Manage;

@@ -1,4 +1,4 @@
-import "./ViewUser.css";
+import "./ViewNews.css";
 import React, { useState, useEffect } from "react";
 import ClearIcon from "@mui/icons-material/Clear";
 import CheckIcon from "@mui/icons-material/Check";
@@ -11,7 +11,7 @@ import Header from "../../components/Header";
 import { useLocation } from "react-router-dom";
 import AuthUser from "../../../../utils/AuthUser";
 
-const ViewUser = (params) => {
+const ViewNews = (params) => {
   const { http } = AuthUser();
   const location = useLocation();
   const { state } = location;
@@ -84,34 +84,9 @@ const ViewUser = (params) => {
     const fetchData = async () => {
       const id = state?.id;
       await http
-        .get(`/auth/detail-user/${id}/`)
+        .get(`/admin/detail-news/${id}/`)
         .then((resolve) => {
-          setViewUser(resolve.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await http
-        .get(`/admin/coments_list_by_user/${id}/`)
-        .then((resolve) => {
-          console.log("comment >>>", resolve);
-          const Comment_with_id = resolve.data.news.map((item, index) => ({
-            ids: index + 1,
-            ...item,
-          }));
-          setComments(Comment_with_id);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await http
-        .get(`/admin/news_list_by_author/${id}/`)
-        .then((resolve) => {
-          const News_with_id = resolve.data.news.map((item, index) => ({
-            ids: index + 1,
-            ...item,
-          }));
-          setNews(News_with_id);
+          console.log("data ", resolve);
         })
         .catch((error) => {
           console.log(error);
@@ -123,6 +98,7 @@ const ViewUser = (params) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  console.log("111 ", state);
   return (
     <div>
       <div>
@@ -220,4 +196,4 @@ const ViewUser = (params) => {
   );
 };
 
-export default ViewUser;
+export default ViewNews;
