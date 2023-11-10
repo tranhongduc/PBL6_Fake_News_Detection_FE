@@ -70,8 +70,7 @@ const Login = () => {
       setAuthorizationHeader(refreshToken);
     }
 
-    http
-      .post("/auth/login/", formData)
+    http.post("/auth/login/", formData)
       .then((resolve) => {
         console.log(resolve);
 
@@ -80,8 +79,9 @@ const Login = () => {
         saveToken(access_token, refresh_token);
         saveUsername(user.username);
 
-        if (user.role === ROLE_ADMIN) {
-          toast.success(`Welcome back admin ${user.username}`, {
+        if (user.role === ROLE_USER) {
+          navigate('/')
+          toast.success(`Welcome back ${user.username}`, {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -91,9 +91,9 @@ const Login = () => {
             progress: undefined,
             theme: "colored",
           });
-        } else if (user.role === ROLE_USER) {
+        } else if (user.role === ROLE_ADMIN) {
           navigate("/admin");
-          toast.success(`Welcome back ${user.username}`, {
+          toast.success(`Welcome back admin ${user.username}`, {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
