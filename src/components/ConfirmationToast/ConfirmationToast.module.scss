@@ -1,0 +1,29 @@
+.confirm-toast-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+    h4 {
+        margin-block: 12px;
+    }
+
+    &__btn {
+        display: flex;
+        justify-content: flex-end;
+        gap: 20px;
+        margin-top: 8px;
+
+        &-ok, &-cancel {
+            color: #FFF;
+            background-color: transparent;
+            border: none;
+            padding: 4px;
+
+            &:hover {
+                cursor: pointer;
+                opacity: 0.8;
+            }
+        }
+    }
+}

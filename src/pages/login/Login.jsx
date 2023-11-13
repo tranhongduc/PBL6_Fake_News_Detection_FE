@@ -49,14 +49,9 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const {
-    http,
-    refreshToken,
-    saveToken,
-    saveUsername,
-    setAuthorizationHeader,
-  } = AuthUser();
+  const { http, refreshToken, saveToken, saveUsername, saveUserRole, setAuthorizationHeader } = AuthUser();
   const [form] = Form.useForm();
+  
   const ROLE_ADMIN = "admin";
   const ROLE_USER = "user";
 
@@ -78,9 +73,10 @@ const Login = () => {
         const user = resolve.data.user;
         saveToken(access_token, refresh_token);
         saveUsername(user.username);
+        saveUserRole(user.role);
 
         if (user.role === ROLE_USER) {
-          navigate('/')
+          navigate("/")
           toast.success(`Welcome back ${user.username}`, {
             position: "top-right",
             autoClose: 3000,
