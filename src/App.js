@@ -4,6 +4,9 @@ import { ToastContainer } from "react-toastify";
 import ScrollToTop from "./utils/ScrollToTop";
 import "react-toastify/dist/ReactToastify.css";
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import Unauthorized from "./pages/unauthorized/Unauthorized";
+import NotFound from "./pages/notFound/NotFound";
+import Dashboard from "./pages/admin/scenes/Dashboard/Dashboard";
 
 const Loading = lazy(() => import("./components/loading/Loading"));
 const Home = lazy(() => import("./pages/home/Home"));
@@ -25,9 +28,44 @@ const ViewNews = lazy(() => import("./pages/admin/scenes/ViewNews/ViewNews"));
 const AdminPage = lazy(() => import("./pages/admin/admin"));
 const Admin = lazy(() => import("./pages/admin/scenes/Manage/Manage"));
 const Default = lazy(() => import("./pages/Default"));
-
+const UserProfile = lazy(() => import("./pages/userProfile/UserProfile"))
 
 const App = () => {
+
+  const ROLE_USER = "user";
+  const ROLE_ADMIN = "admin";
+
+  const UserRoute = ({ element }) => {
+    const roleUser = localStorage.getItem("role").replace(/"/g, "");
+
+    if (roleUser === ROLE_USER) {
+      return element;
+    } else {
+      return <Navigate to="/unauthorized" replace />;
+    }
+  };
+  
+  const AdminRoute = ({ element }) => {
+    const roleUser = localStorage.getItem("role")?.replace(/"/g, "");
+
+    if (roleUser === ROLE_ADMIN) {
+      return element;
+    } else {
+      return <Navigate to="/unauthorized" replace />;
+    }
+  };
+
+  const AuthRoute = ({ element }) => {
+    const token = localStorage.getItem("access_token");
+
+    if (token !== null) {
+      return element;
+    } else {
+      return <Navigate to="/unauthorized" replace />;
+    }
+  };
+
+
   return (
     <div className="App">
       <BrowserRouter>
@@ -83,16 +121,38 @@ const App = () => {
             }
           />
 
+          {/* customer routes */}
+          <Route
+            path="/user-profile"
+            element={
+              <UserRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <UserProfile />
+                  </Suspense>
+                }
+              />
+            }
+          />
+
           {/* admin routes */}
           <Route
             path="/admin"
             element={
-              <Suspense fallback={<Loading />}>
-                <AdminPage />
-              </Suspense>
+              <AdminRoute
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <AdminPage />
+                  </Suspense>
+                }
+              />
             }
           >
-            <Route index element={<DashBoard/>}/>
+            <Route
+              index
+              element={<Dashboard />}
+            />
+
             <Route
               path="user"
               element={
@@ -150,6 +210,26 @@ const App = () => {
               }
             />
           </Route>
+
+          {/* Unauthorized Page */}
+          <Route
+            path="/unauthorized"
+            element={
+              <Suspense fallback={<Loading />}>
+                <Unauthorized />
+              </Suspense>
+            }
+          />
+
+          {/* Not found routes */}
+          <Route
+            path="*"
+            element={
+              <Suspense fallback={<Loading />}>
+                <NotFound />
+              </Suspense>
+            }
+          />
         </Routes>
       </BrowserRouter>
       <ToastContainer />

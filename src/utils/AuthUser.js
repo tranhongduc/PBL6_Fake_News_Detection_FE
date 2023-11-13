@@ -23,6 +23,11 @@ export default function AuthUser() {
         return !!usernameString
     }
 
+    const hasRole = () => {
+        const roleString = localStorage.getItem('role');
+        return !!roleString
+    }
+
     const [accessToken, setAccessToken] = useState(() => {
         const accessTokenString = localStorage.getItem('access_token');
         const accessToken = JSON.parse(accessTokenString);
@@ -41,6 +46,12 @@ export default function AuthUser() {
         return username;
     });
 
+    const [role, setRole] = useState(() => {
+        const roleString = localStorage.getItem('role');
+        const role = JSON.parse(roleString);
+        return role;
+    });
+
     const dispatch = useDispatch();
 
     const saveToken = (accessToken, refreshToken) => {
@@ -55,6 +66,12 @@ export default function AuthUser() {
         localStorage.setItem('username', JSON.stringify(username));
 
         setUsername(username);
+    }
+
+    const saveUserRole = (role) => {
+        localStorage.setItem('role', JSON.stringify(role))
+
+        setRole(role)
     }
 
     const logout = () => {
@@ -89,12 +106,14 @@ export default function AuthUser() {
         username,
         accessToken,
         refreshToken,
+        role,
         hasAccessToken,
         hasRefreshToken,
         hasUsername,
         setAuthorizationHeader,
         saveToken,
         saveUsername,
+        saveUserRole,
         logout,
     }
 }
