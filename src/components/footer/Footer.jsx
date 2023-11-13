@@ -10,13 +10,13 @@ const cx = classNames.bind(styles);
 const Footer = () => {
   return (
     <footer className={cx("boxItems")}>
-      <div className='container flex'>
+      <div className={cx("container", "flex")}>
         <p>Cartsy Medicine - All right reserved - Design & Developed by RedQ, Inc</p>
-        <div className='social'>
-          <BsFacebook className='icon' />
-          <RiInstagramFill className='icon' />
-          <AiFillTwitterCircle className='icon' />
-          <AiFillLinkedin className='icon' />
+        <div className={cx("social")}>
+          <BsFacebook className={cx("icon")} />
+          <RiInstagramFill className={cx("icon")} />
+          <AiFillTwitterCircle className={cx("icon")} />
+          <AiFillLinkedin className={cx("icon")} />
         </div>
       </div>
     </footer>

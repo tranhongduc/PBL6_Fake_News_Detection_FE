@@ -59,11 +59,18 @@ const Header = () => {
       <div className={cx("header__middle")}>
         <nav>
           <ul>
-            {nav.map((link) => (
-              <li key={link.id}>
-                <Link to={link.url}>{link.text}</Link>
-              </li>
-            ))}
+            <li>
+              {isLoggedIn ? (
+                <>
+                  <Link to="/">Home</Link>
+                  <Link to="/create">Create Post</Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/">Home</Link>
+                </>
+              )}
+            </li>
           </ul>
         </nav>
       </div>

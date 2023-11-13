@@ -4,6 +4,7 @@ import classNames from "classnames/bind";
 import Category from '../../components/category/Category';
 import Blog from "../../components/blog/Blog";
 import Header from "../../components/header/Header";
+import Footer from "../../components/footer/Footer";
 
 const cx = classNames.bind(styles);
 
@@ -13,6 +14,7 @@ const Home = () => {
       <Header />
       <Category />
       <Blog />
+      <Footer />
     </div>
   )
 }

@@ -152,22 +152,6 @@ const App = () => {
           </Route>
         </Routes>
       </BrowserRouter>
-      {/* <Routes>
-        <Route path='/' element={<Default />} >
-          <Route index element={<Home />} />
-          <Route path='details/:id' element={<DetailsPages />} />
-          <Route path='account' element={<Account />} />
-          <Route path='create' element={<Create />} />
-        </Route>
-        <Route path='admin' element={<AdminPage />} >
-          <Route index element={<Dashboard />} />
-          <Route path="user" element={<User />} />
-          <Route path="view_user" element={<ViewUser />} />
-          <Route path="category" element={<Category />} />
-          <Route path="news" element={<News />} />
-          <Route path="manage" element={<Admin />} />
-        </Route>
-      </Routes> */}
       <ToastContainer />
     </div>
   )

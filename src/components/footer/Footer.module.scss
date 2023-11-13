@@ -1,8 +1,20 @@
 footer {
     padding: 10px;
+    border: 1px solid #ededed;
 
     .icon {
         font-size: 20px;
         margin-left: 10px;
     }
+}
+
+.container {
+    max-width: 95%;
+    margin: auto;
+}
+
+.flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
