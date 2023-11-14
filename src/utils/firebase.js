@@ -8,13 +8,14 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDxsTPWLS39ik1PLi8q2mWJjOX47mf7xDQ",
-  authDomain: "ltd-resort.firebaseapp.com",
-  projectId: "ltd-resort",
-  storageBucket: "ltd-resort.appspot.com",
-  messagingSenderId: "488848402002",
-  appId: "1:488848402002:web:681115cae44fb86542618b"
+  apiKey: "AIzaSyCwoMsuup3EVKD-MVvH9m8tXPWyao0drCU",
+  authDomain: "pbl6-8431d.firebaseapp.com",
+  projectId: "pbl6-8431d",
+  storageBucket: "pbl6-8431d.appspot.com",
+  messagingSenderId: "973008108841",
+  appId: "1:973008108841:web:c097efc8004aeceb314b38"
 };
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
