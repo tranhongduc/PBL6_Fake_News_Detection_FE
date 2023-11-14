@@ -96,3 +96,30 @@
         font-size: 20px;
     }
 }
+
+.list-news-pagination {
+    display: flex;
+    margin-top: 40px;
+    justify-content: center;
+    
+    > ul {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        
+        > * {
+            border-color: #8DD3BB !important;
+            height: 36px !important;
+
+            > a {
+                font-size: 18px;
+                line-height: 36px;  
+            }
+        }
+
+        > li:last-child {
+            width: 100%;
+        }
+    }
+}
