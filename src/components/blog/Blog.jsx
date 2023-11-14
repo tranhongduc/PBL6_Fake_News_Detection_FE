@@ -6,6 +6,8 @@ import { Link } from "react-router-dom"
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import AuthUser from "../../utils/AuthUser";
 import { Pagination } from "antd";
+import { storage } from '../../utils/firebase'
+import { ref, getDownloadURL, listAll } from "firebase/storage"
 
 const cx = classNames.bind(styles);
 
@@ -19,6 +21,24 @@ const Blog = () => {
     const category = categories.find(category => category.id === categoryId)
     return category.name
   }
+
+  // Fetch image state
+  const [imageUrl, setImageUrl] = useState({});
+
+  const getFirebaseImageURL = async (imagePath, newsId) => {
+    const imageRef = ref(storage, imagePath);
+    try {
+      const url = await getDownloadURL(imageRef);
+      console.log('Url:', url)
+      console.log('Image Url:', imageUrl)
+      setImageUrl(prevState => ({
+        ...prevState,
+        [newsId]: url
+      }));
+    } catch (error) {
+      console.error('Error getting image URL', error);
+    }
+  };
 
   // Pagination state
   const pageSizeOptions = [9, 12, 15];
@@ -73,16 +93,33 @@ const Blog = () => {
       http.get(`api/user/paging?page_number=${currentPage}&page_size=${pageSize}`)
         .then((resolve) => {
           console.log(resolve.data)
-          setListNews(resolve.data.list_news)
+          const newListNews = resolve.data.list_news.map((news) => ({
+            ...news,
+            imageUrl: '',
+          }));
+          setListNews(newListNews);
+          
+          // Lấy URL cho từng tin tức
+          newListNews.forEach((news) => {
+            getFirebaseImageURL(news.image, news.id);
+          });
         })
         .catch((reject) => {
-          console.log(reject)
-        })
-    }
-
-    fetchData()
+          console.log(reject);
+        });
+    };
+  
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, pageSize])
+  }, [currentPage, pageSize]);
+  
+  useEffect(() => {
+    const updatedListNews = listNews.map((news) => ({
+      ...news,
+      imageUrl: imageUrl[news.id] || '',
+    }));
+    setListNews(updatedListNews);
+  }, [imageUrl]);  
 
   return (
     <section className={cx("blog")}>
@@ -92,7 +129,7 @@ const Blog = () => {
             <div className={cx("img")}>
               <LazyLoadImage
                 key={news.id}
-                src={"https://images.unsplash.com/photo-1432821596592-e2c18b78144f?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YmxvZ3xlbnwwfHwwfHx8MA%3D%3D"}
+                src={imageUrl[news.id] || ''}
                 alt={`Blog ${news.id}`}
                 effect="blur"
               />
