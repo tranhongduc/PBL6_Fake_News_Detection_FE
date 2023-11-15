@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react"
 import styles from './Blog.module.scss'
 import classNames from "classnames/bind";
-import { AiOutlineTags, AiOutlineComment, AiOutlineShareAlt } from "react-icons/ai"
+import { AiOutlineTags, AiOutlineComment, AiOutlineShareAlt, AiOutlineClockCircle } from "react-icons/ai"
 import { Link } from "react-router-dom"
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import AuthUser from "../../utils/AuthUser";
 import { Pagination } from "antd";
 import { storage } from '../../utils/firebase'
-import { ref, getDownloadURL, listAll } from "firebase/storage"
+import { ref, getDownloadURL } from "firebase/storage"
 
 const cx = classNames.bind(styles);
 
@@ -30,11 +30,11 @@ const Blog = () => {
     try {
       const url = await getDownloadURL(imageRef);
       console.log('Url:', url)
-      console.log('Image Url:', imageUrl)
       setImageUrl(prevState => ({
         ...prevState,
         [newsId]: url
       }));
+      console.log('Image Url:', imageUrl)
     } catch (error) {
       console.error('Error getting image URL', error);
     }
@@ -67,20 +67,20 @@ const Blog = () => {
     const fetchData = () => {
       http.get('api/user/news/total')
         .then((resolve) => {
-          console.log(resolve)
+          console.log('Total news:', resolve.data)
           setTotalNews(resolve.data.news_count)
         })
         .catch((reject) => {
-          console.log(reject)
+          console.log('Error:', reject)
         })
 
       http.get('api/user/categories')
         .then((resolve) => {
-          console.log(resolve)
+          console.log('Categories:', resolve.data)
           setCategories(resolve.data.categories)
         })
         .catch((reject) => {
-          console.log(reject)
+          console.log('Error:', reject)
         })
     }
 
@@ -92,34 +92,37 @@ const Blog = () => {
     const fetchData = () => {
       http.get(`api/user/paging?page_number=${currentPage}&page_size=${pageSize}`)
         .then((resolve) => {
-          console.log(resolve.data)
-          const newListNews = resolve.data.list_news.map((news) => ({
+          console.log('List news:', resolve.data)
+          const listNews = resolve.data.list_news
+
+          const newListNews = listNews.map((news) => ({
             ...news,
             imageUrl: '',
           }));
+          console.log('New list news:', newListNews)
           setListNews(newListNews);
-          
+
           // Lấy URL cho từng tin tức
           newListNews.forEach((news) => {
             getFirebaseImageURL(news.image, news.id);
           });
         })
         .catch((reject) => {
-          console.log(reject);
+          console.log('Error:', reject);
         });
     };
-  
+
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize]);
-  
+
   useEffect(() => {
     const updatedListNews = listNews.map((news) => ({
       ...news,
       imageUrl: imageUrl[news.id] || '',
     }));
     setListNews(updatedListNews);
-  }, [imageUrl]);  
+  }, [imageUrl]);
 
   return (
     <section className={cx("blog")}>
@@ -127,24 +130,28 @@ const Blog = () => {
         {listNews.map((news) => (
           <div className={cx("boxItems")} key={news.id}>
             <div className={cx("img")}>
-              <LazyLoadImage
-                key={news.id}
-                src={imageUrl[news.id] || ''}
-                alt={`Blog ${news.id}`}
-                effect="blur"
-              />
+              <Link to={`/details/${news.id}`}>
+                <LazyLoadImage
+                  key={news.id}
+                  src={imageUrl[news.id] || ''}
+                  alt={`Blog ${news.id}`}
+                  effect="blur"
+                />
+              </Link>
             </div>
             <div className={cx("details")}>
               <div className={cx("tag")}>
                 <AiOutlineTags className={cx("icon")} />
-                <a href='/'>{getCategoryNameById(news.category_id)}</a>
+                <Link to={'/'}>
+                  {getCategoryNameById(news.category_id)}
+                </Link>
               </div>
               <Link to={`/details/${news.id}`} className={cx("link")}>
                 <h3>{news.title}</h3>
               </Link>
               <p>{news.text.slice(0, 180)}...</p>
               <div className={cx("date")}>
-                {/* <AiOutlineClockCircle className={cx("icon")} /> <label htmlFor='date'>{item.date}</label> */}
+                <AiOutlineClockCircle className={cx("icon")} /> <label htmlFor='date'>{"Feb 02/2024"}</label>
                 <AiOutlineComment className={cx("icon")} /> <label htmlFor='comment'>27</label>
                 <AiOutlineShareAlt className={cx("icon")} /> <label htmlFor='share'>SHARE</label>
               </div>
