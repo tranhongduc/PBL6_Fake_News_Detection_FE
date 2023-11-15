@@ -44,7 +44,7 @@ const App = () => {
       return <Navigate to="/unauthorized" replace />;
     }
   };
-  
+
   const AdminRoute = ({ element }) => {
     const roleUser = localStorage.getItem("role")?.replace(/"/g, "");
 
