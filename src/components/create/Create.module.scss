@@ -1,107 +1,93 @@
-.newPost {
+.create-post-section {
   margin: 60px 0;
-
-  .container {
-    max-width: 50%;
-  }
-
-  i {
-    font-size: 25px;
-    margin-right: 20px;
-    margin-top: -20px;
-  }
-
-  img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-  }
-
-  .img {
-    position: relative;
-
-    img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 300px;
-      z-index: 1;
-      border-radius: 5px;
-    }
-  }
-
-  form {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    border: none;
-  }
-
-  .inputfile {
-    input {
-      width: 100%;
-      height: 300px;
-      position: relative;
-      z-index: 2;
-      opacity: 0;
-    }
-  }
-}
-
-.button {
-  background: #212121;
-  border: 1px solid;
-  border-color: #212121;
-  border-radius: 6px;
-  color: #fff;
-  cursor: pointer;
-  font-weight: 400;
-  height: 48px;
-  line-height: 1;
-  padding: 15px 28px;
-}
-
-.flex {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+
+  &__container {
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    padding: 20px;
+    background: #fff;
+  }
 }
 
-.flexCenter {
+.image-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+
+  > p {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  > img {
+    width: 90%;
+    height: 500px;
+    border-radius: 12px;
+    object-fit: contain;
+    margin-bottom: 30px;
+  }
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+  border: none;
+}
+
+.btn-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.boxItems {
-  border: 1px solid #e6e6e6;
-  border-radius: 12px;
-  padding: 20px;
-  background: #fff;
-}
-form {
+.btn-image-container {
   display: flex;
-  flex-direction: column;
-  width: 50%;
-  margin: auto;
-  margin-top: 80px;
-  padding: 40px;
-}
-form span {
+  justify-content: center;
+  align-items: center;
   margin-bottom: 20px;
 }
-form textarea,
-.accountInfo .right input,
-form input {
-  border: 1px solid #212121;
+
+.btn-upload-image {
+  background-color: rgb(36, 132, 9);
+  border: 1px solid;
+  border-color: rgb(36, 132, 9) 1px solid;
   border-radius: 6px;
-  color: #212121;
-  font-size: 15px;
-  min-height: 44px;
-  padding: 0 20px;
-  transition: border-color 0.2s ease;
-  width: 100%;
-  margin-bottom: 30px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+  padding: 12px 20px;
+  font-size: 16px;
+
+  &:hover {
+    cursor: pointer;
+    opacity: 0.8;
+    background-color: rgb(36, 132, 9) !important;
+  }
+}
+
+.btn-submit {
+  background-color: #212121;
+  border: 1px solid;
+  border-color: #212121;
+  border-radius: 6px;
+  color: #fff;
+  transition: 0.3s;
+
+  &:hover {
+    cursor: pointer;
+    opacity: 0.8;
+    background-color: #212121 !important;
+  }
+}
+
+.categories-options {
+  width: 26% !important;
 }

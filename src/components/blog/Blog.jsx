@@ -8,6 +8,7 @@ import AuthUser from "../../utils/AuthUser";
 import { Pagination } from "antd";
 import { storage } from '../../utils/firebase'
 import { ref, getDownloadURL } from "firebase/storage"
+import { format } from 'date-fns';
 
 const cx = classNames.bind(styles);
 
@@ -151,7 +152,7 @@ const Blog = () => {
               </Link>
               <p>{news.text.slice(0, 180)}...</p>
               <div className={cx("date")}>
-                <AiOutlineClockCircle className={cx("icon")} /> <label htmlFor='date'>{"Feb 02/2024"}</label>
+                <AiOutlineClockCircle className={cx("icon")} /> <label htmlFor='date'>{format(new Date(news.created_at), 'dd/MM/yyyy')}</label>
                 <AiOutlineComment className={cx("icon")} /> <label htmlFor='comment'>27</label>
                 <AiOutlineShareAlt className={cx("icon")} /> <label htmlFor='share'>SHARE</label>
               </div>
