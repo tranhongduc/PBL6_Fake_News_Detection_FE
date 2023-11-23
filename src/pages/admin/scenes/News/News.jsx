@@ -65,7 +65,7 @@ const News = () => {
   useEffect(() => {
     const fetchData = async () => {
       await http
-        .get(`/admin/news_list/`)
+        .get(`/api/admin/news_list/`)
         .then((resolve) => {
           console.log(resolve);
           setNews(resolve.data.news);

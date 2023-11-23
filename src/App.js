@@ -10,6 +10,7 @@ import Dashboard from "./pages/admin/scenes/Dashboard/Dashboard";
 
 const Loading = lazy(() => import("./components/loading/Loading"));
 const Home = lazy(() => import("./pages/home/Home"));
+const List = lazy(() => import("./components/list/List"));
 const Register = lazy(() => import("./pages/register/Register"));
 const DetailsPages = lazy(() => import("./pages/details/DetailsPages"));
 const Account = lazy(() => import("./pages/account/Account"));
@@ -89,6 +90,22 @@ const App = () => {
             }
           />
           <Route
+            path='/list'
+            element={
+              <Suspense fallback={<Loading />}>
+                <List />
+              </Suspense>
+            }
+          />
+          <Route
+            path='/category/:id'
+            element={
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
+            }
+          />
+          <Route
             path='/register'
             element={
               <Suspense fallback={<Loading />}>
@@ -117,6 +134,15 @@ const App = () => {
             element={
               <Suspense fallback={<Loading />}>
                 <Create />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path='/category'
+            element={
+              <Suspense fallback={<Loading />}>
+                <List />
               </Suspense>
             }
           />

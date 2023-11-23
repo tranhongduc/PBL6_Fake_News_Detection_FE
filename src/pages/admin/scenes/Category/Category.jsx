@@ -38,7 +38,7 @@ const Category = () => {
   useEffect(() => {
     const fetchData = async () => {
       await http
-        .get(`/admin/categories_list/`)
+        .get(`/api/admin/categories_list/`)
         .then((resolve) => {
           console.log(resolve);
           setCategory(resolve.data.categories);
@@ -52,6 +52,7 @@ const Category = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <Box m="20px">
       <Header title="CATOGORY" subtitle="Category News" />

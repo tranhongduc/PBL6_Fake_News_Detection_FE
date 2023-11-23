@@ -67,7 +67,7 @@ const ViewCategory = (params) => {
     const fetchData = async () => {
       const id = state?.id;
       await http
-        .get(`/admin/news_list_by_category/${id}/`)
+        .get(`/api/admin/news_list_by_category/${id}/`)
         .then((resolve) => {
           console.log("data ", resolve);
           const news_id = resolve.data.news.map((item, index) => ({
@@ -88,7 +88,7 @@ const ViewCategory = (params) => {
 
   console.log("111 ", state);
   return (
-    <div>
+    <Box m="20px">
       <div>
         <Header title="CATEGORY DETAIL" subtitle="Category Detail" />
         <div className="account-info">
@@ -135,12 +135,12 @@ const ViewCategory = (params) => {
                 }}
               >
                 <DataGrid rows={news} columns={newsColumns} />
-              </Box>{" "}
+              </Box>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Box>
   );
 };
 

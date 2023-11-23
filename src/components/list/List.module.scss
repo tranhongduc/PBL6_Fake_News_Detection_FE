@@ -1,0 +1,13 @@
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  height: 1000px;
+  margin: 20px;
+  &.box {
+    &.overlay {
+      &h3 {
+      }
+    }
+  }
+}

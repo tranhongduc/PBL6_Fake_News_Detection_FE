@@ -23,7 +23,6 @@
     .new{
         display: flex;
         flex-direction:column;
-        width: 50%;
         .title-text{
             width: 10%;
         }

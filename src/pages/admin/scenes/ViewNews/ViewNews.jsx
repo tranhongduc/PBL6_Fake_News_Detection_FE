@@ -84,7 +84,7 @@ const ViewNews = (params) => {
     const fetchData = async () => {
       const id = state?.id;
       await http
-        .get(`/admin/detail-news/${id}/`)
+        .get(`/api/admin/detail-news/${id}/`)
         .then((resolve) => {
           console.log("data ", resolve);
         })
@@ -100,23 +100,21 @@ const ViewNews = (params) => {
 
   console.log("111 ", state);
   return (
-    <div>
+    <Box m="20px">
       <div>
-        <Header title="STAFF INFO" subtitle="Staff infomation" />
+        <Header title="CATEGORY DETAIL" subtitle="Category Detail" />
         <div className="account-info">
           <div className="info-container">
-            <div className="title-text">Name</div>
-            <div className="content-text">{viewUser?.username}</div>
+            <div className="title-text">Category Name</div>
+            <div className="content-text">{state?.name}</div>
           </div>
           <div className="info-container">
-            <div className="title-text">Email</div>
-            <div className="content-text">{viewUser?.email}</div>
+            <div className="title-text">Number of news</div>
+            <div className="content-text">{state?.news_count}</div>
           </div>
         </div>
         <div className="news-comment">
           <div className="new">
-            <div className="title-text">New</div>
-            <div className="content-text">{viewUser?.news_count}</div>
             <div>
               <Box
                 m="40px 0 0 0"
@@ -149,50 +147,106 @@ const ViewNews = (params) => {
                 }}
               >
                 <DataGrid rows={news} columns={newsColumns} />
-              </Box>{" "}
-            </div>
-          </div>
-          <Divider type="vertical" className="divide" />
-          <div className="comment">
-            <div className="title-text">Comment</div>
-            <div className="content-text">{viewUser?.comments_count}</div>
-            <div>
-              <Box
-                m="40px 0 0 0"
-                height="75vh"
-                sx={{
-                  "& .MuiDataGrid-root": {
-                    border: "none",
-                  },
-                  "& .MuiDataGrid-cell": {
-                    borderBottom: "none",
-                  },
-                  "& .name-column--cell": {
-                    color: colors.greenAccent[300],
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor: colors.blueAccent[700],
-                    borderBottom: "none",
-                  },
-                  "& .MuiDataGrid-virtualScroller": {
-                    backgroundColor: colors.primary[400],
-                  },
-                  "& .MuiDataGrid-footerContainer": {
-                    borderTop: "none",
-                    backgroundColor: colors.blueAccent[700],
-                  },
-                  "& .MuiCheckbox-root": {
-                    color: `${colors.greenAccent[200]} !important`,
-                  },
-                }}
-              >
-                <DataGrid rows={mockDataTeam} columns={columns} />
-              </Box>{" "}
+              </Box>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Box>
+
+    // <div>
+    //   <div>
+    //     <Header title="STAFF INFO" subtitle="Staff infomation" />
+    //     <div className="account-info">
+    //       <div className="info-container">
+    //         <div className="title-text">Name</div>
+    //         <div className="content-text">{viewUser?.username}</div>
+    //       </div>
+    //       <div className="info-container">
+    //         <div className="title-text">Email</div>
+    //         <div className="content-text">{viewUser?.email}</div>
+    //       </div>
+    //     </div>
+    //     <div className="news-comment">
+    //       <div className="new">
+    //         <div className="title-text">New</div>
+    //         <div className="content-text">{viewUser?.news_count}</div>
+    //         <div>
+    //           <Box
+    //             m="40px 0 0 0"
+    //             height="75vh"
+    //             sx={{
+    //               "& .MuiDataGrid-root": {
+    //                 border: "none",
+    //               },
+    //               "& .MuiDataGrid-cell": {
+    //                 borderBottom: "none",
+    //               },
+    //               "& .name-column--cell": {
+    //                 color: colors.greenAccent[300],
+    //               },
+    //               "& .MuiDataGrid-columnHeaders": {
+    //                 backgroundColor: colors.blueAccent[700],
+    //                 borderBottom: "none",
+    //               },
+    //               "& .MuiDataGrid-virtualScroller": {
+    //                 backgroundColor: colors.primary[400],
+    //               },
+    //               "& .MuiDataGrid-footerContainer": {
+    //                 borderTop: "none",
+    //                 backgroundColor: colors.blueAccent[700],
+    //               },
+    //               "& .MuiCheckbox-root": {
+    //                 color: `${colors.greenAccent[200]} !important`,
+    //               },
+    //               "& .MuiDataGrid-root": { fontSize: "1.5rem" },
+    //             }}
+    //           >
+    //             <DataGrid rows={news} columns={newsColumns} />
+    //           </Box>{" "}
+    //         </div>
+    //       </div>
+    //       <Divider type="vertical" className="divide" />
+    //       <div className="comment">
+    //         <div className="title-text">Comment</div>
+    //         <div className="content-text">{viewUser?.comments_count}</div>
+    //         <div>
+    //           <Box
+    //             m="40px 0 0 0"
+    //             height="75vh"
+    //             sx={{
+    //               "& .MuiDataGrid-root": {
+    //                 border: "none",
+    //               },
+    //               "& .MuiDataGrid-cell": {
+    //                 borderBottom: "none",
+    //               },
+    //               "& .name-column--cell": {
+    //                 color: colors.greenAccent[300],
+    //               },
+    //               "& .MuiDataGrid-columnHeaders": {
+    //                 backgroundColor: colors.blueAccent[700],
+    //                 borderBottom: "none",
+    //               },
+    //               "& .MuiDataGrid-virtualScroller": {
+    //                 backgroundColor: colors.primary[400],
+    //               },
+    //               "& .MuiDataGrid-footerContainer": {
+    //                 borderTop: "none",
+    //                 backgroundColor: colors.blueAccent[700],
+    //               },
+    //               "& .MuiCheckbox-root": {
+    //                 color: `${colors.greenAccent[200]} !important`,
+    //               },
+    //             }}
+    //           >
+    //             <DataGrid rows={mockDataTeam} columns={columns} />
+    //           </Box>{" "}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>
+    // </div>
   );
 };
 
