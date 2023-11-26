@@ -7,9 +7,10 @@ import img from "../../assets/images/b11.jpeg"
 import { Form, Input, Select, Button } from 'antd';
 import AuthUser from "../../utils/AuthUser";
 import { toast } from 'react-toastify';
-import ReactQuill from "react-quill";
 import 'react-quill/dist/quill.snow.css'
 import TextEditor from "../textEditor/TextEditor";
+import Swal from "sweetalert2";
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -29,6 +30,8 @@ const Create = () => {
     },
   };
 
+  const navigate = useNavigate();
+
   // ---------------------------  Handle Upload Image ---------------------------
 
   const handleClickUploadImage = () => {
@@ -45,26 +48,43 @@ const Create = () => {
   const [form] = Form.useForm();
 
   // Successful case
-  const onCreatePostSuccessed = () => {
-    console.log('HELLO')
-    console.log('Value:', value)
-    toast.error('Error!', {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    })
+  const onCreatePostSuccessed = (values) => {
+    const { title, category, text } = values
+    const formData = new FormData();
+
+    formData.append('title', title)
+    formData.append('category', category)
+    formData.append('text', text)
+
+    http.patch('api/user/news/create/', formData)
+      .then(() => {
+        Swal.fire(
+          'Ta~Da~',
+          'You\'ve create new post successfully',
+          'success'
+        ).then(() => {
+          navigate(0);
+        })
+      })
+      .catch((reject) => {
+        console.log(reject);
+        toast.error('Oops. Try again', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        })
+      })
   }
 
   // Failed case
-  const onCreatePostFailed = () => {
-    console.log('ERROR')
-    console.log('Value:', value)
-    toast.error('Error!', {
+  const onCreatePostFailed = (error) => {
+    console.log('Error:', error)
+    toast.error('Please input all fields', {
       position: "top-right",
       autoClose: 3000,
       hideProgressBar: false,

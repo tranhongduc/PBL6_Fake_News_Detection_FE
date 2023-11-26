@@ -36,7 +36,7 @@ const DetailsPages = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await http.get(`api/user/news/${id}`);
+        const response = await http.get(`/user/news/${id}`);
         const newsDetail = response.data.news_detail;
         console.log('Detail:', response.data);
 

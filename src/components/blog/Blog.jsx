@@ -19,8 +19,10 @@ const Blog = () => {
   const [categories, setCategories] = useState([]);
 
   const getCategoryNameById = (categoryId) => {
-    const category = categories.find(category => category.id === categoryId)
-    return category.name
+    if (categoryId !== undefined) {
+      const category = categories.find(category => category.id === categoryId)
+      return category.name
+    }
   }
 
   // Fetch image state
@@ -66,7 +68,7 @@ const Blog = () => {
   // --------------------------     Fetch API     --------------------------
   useEffect(() => {
     const fetchData = () => {
-      http.get('api/user/news/total')
+      http.get('user/news/total')
         .then((resolve) => {
           console.log('Total news:', resolve.data)
           setTotalNews(resolve.data.news_count)
@@ -75,7 +77,7 @@ const Blog = () => {
           console.log('Error:', reject)
         })
 
-      http.get('api/user/categories')
+      http.get('user/categories')
         .then((resolve) => {
           console.log('Categories:', resolve.data)
           setCategories(resolve.data.categories)
@@ -91,7 +93,7 @@ const Blog = () => {
 
   useEffect(() => {
     const fetchData = () => {
-      http.get(`api/user/paging?page_number=${currentPage}&page_size=${pageSize}`)
+      http.get(`user/paging?page_number=${currentPage}&page_size=${pageSize}`)
         .then((resolve) => {
           console.log('List news:', resolve.data)
           const listNews = resolve.data.list_news
@@ -144,7 +146,7 @@ const Blog = () => {
               <div className={cx("tag")}>
                 <AiOutlineTags className={cx("icon")} />
                 <Link to={'/'}>
-                  {getCategoryNameById(news.category_id)}
+                  {getCategoryNameById(news.category)}
                 </Link>
               </div>
               <Link to={`/details/${news.id}`} className={cx("link")}>
