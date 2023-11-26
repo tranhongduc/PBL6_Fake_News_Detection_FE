@@ -52,6 +52,12 @@ export default function AuthUser() {
         return role;
     });
 
+    const [avatar, setAvatar] = useState(() => {
+        const avatarString = localStorage.getItem('avatar');
+        const avatar = JSON.parse(avatarString);
+        return avatar;
+    });
+
     const dispatch = useDispatch();
 
     const saveToken = (accessToken, refreshToken) => {
@@ -74,8 +80,19 @@ export default function AuthUser() {
         setRole(role)
     }
 
+    const saveAvatar = (avatar) => {
+        localStorage.setItem('avatar', JSON.stringify(avatar))
+
+        setAvatar(avatar)
+    }
+
+
     const logout = () => {
         localStorage.removeItem('access_token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        localStorage.removeItem('avatar');
+
         dispatch(removeAvatar(''));
         navigate('/login')
         toast.success('Logout successful!', {
@@ -107,6 +124,7 @@ export default function AuthUser() {
         accessToken,
         refreshToken,
         role,
+        avatar,
         hasAccessToken,
         hasRefreshToken,
         hasUsername,
@@ -114,6 +132,7 @@ export default function AuthUser() {
         saveToken,
         saveUsername,
         saveUserRole,
+        saveAvatar,
         logout,
     }
 }

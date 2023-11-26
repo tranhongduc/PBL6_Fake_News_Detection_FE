@@ -49,9 +49,9 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const { http, refreshToken, saveToken, saveUsername, saveUserRole, setAuthorizationHeader } = AuthUser();
+  const { http, refreshToken, saveToken, saveUsername, saveUserRole, saveAvatar, setAuthorizationHeader } = AuthUser();
   const [form] = Form.useForm();
-  
+
   const ROLE_ADMIN = "admin";
   const ROLE_USER = "user";
 
@@ -74,6 +74,7 @@ const Login = () => {
         saveToken(access_token, refresh_token);
         saveUsername(user.username);
         saveUserRole(user.role);
+        saveAvatar(user.avatar);
 
         if (user.role === ROLE_USER) {
           navigate("/")
