@@ -1,5 +1,5 @@
 .manage-account-wrapper {
-    background-color: #FFF8F6;
+    background-color: white;
     
     &__top {
         display: flex;
@@ -60,7 +60,7 @@
             }
 
             h1, p {
-                margin-block: 12px;
+                margin-block: 16px;
             }
 
             p {
@@ -75,10 +75,15 @@
         margin-inline: 5%;
         margin-bottom: 40px;
 
+        .action {
+            background-color: whitesmoke;
+            border-radius: 8px;
+        }
+
         .content {
             margin-top: 50px;
             border: 1px solid whitesmoke;
-            border-radius: 10px;
+            border-radius: 8;
             background-color: whitesmoke;
         }
     }

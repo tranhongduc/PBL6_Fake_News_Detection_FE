@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react"
 import styles from './Header.module.scss'
 import classNames from "classnames/bind";
 import logo from "../../assets/images/logo.svg"
-import placeholderAvatar from "../../assets/images/default-user-icon.jpeg"
-import { nav } from "../../assets/data/data"
+import placeholderAvatar from "../../assets/images/default-user-icon.jpg"
 import { Link } from "react-router-dom"
 import { Divider, Popover } from 'antd'
 import { FaUser } from 'react-icons/fa'
@@ -46,9 +45,9 @@ const Header = () => {
   const content = (
     <div className={cx("content-wrapper")}>
       <div className={cx("content-wrapper__link")}>
-        <Link to="/user-profile" className={cx("content-wrapper__link-item")}>
+        <Link to="/manage-account" className={cx("content-wrapper__link-item")}>
           <FaUser />
-          <p>User Profile</p>
+          <p>Manage Account</p>
         </Link>
       </div>
       <Divider className={cx("seperate-line")} />
@@ -63,7 +62,6 @@ const Header = () => {
 
   useEffect(() => {
     const fetchAvatar = () => {
-      console.log('Avatar Selector:', avatarSelector);
       getDownloadURL(avatarRef).then(url => {
         dispatch(addAvatar(url));
       })

@@ -23,11 +23,6 @@ export default function AuthUser() {
         return !!usernameString
     }
 
-    const hasRole = () => {
-        const roleString = localStorage.getItem('role');
-        return !!roleString
-    }
-
     const [accessToken, setAccessToken] = useState(() => {
         const accessTokenString = localStorage.getItem('access_token');
         const accessToken = JSON.parse(accessTokenString);
@@ -40,57 +35,44 @@ export default function AuthUser() {
         return refreshToken;
     });
 
-    const [username, setUsername] = useState(() => {
-        const usernameString = localStorage.getItem('username');
-        const username = JSON.parse(usernameString);
-        return username;
-    });
-
     const [role, setRole] = useState(() => {
         const roleString = localStorage.getItem('role');
         const role = JSON.parse(roleString);
         return role;
     });
 
+    const [username, setUsername] = useState(() => {
+        const usernameString = localStorage.getItem('username');
+        const username = JSON.parse(usernameString);
+        return username;
+    });
+
     const [avatar, setAvatar] = useState(() => {
-        const avatarString = localStorage.getItem('avatar');
+        const avatarString = localStorage.getItem('username');
         const avatar = JSON.parse(avatarString);
         return avatar;
     });
 
     const dispatch = useDispatch();
 
-    const saveToken = (accessToken, refreshToken) => {
+    const saveToken = (accessToken, refreshToken, user) => {
         localStorage.setItem('access_token', JSON.stringify(accessToken));
         localStorage.setItem('refresh_token', JSON.stringify(refreshToken));
+        localStorage.setItem('role', JSON.stringify(user.role));
+        localStorage.setItem('username', JSON.stringify(user.username));
+        localStorage.setItem('avatar', JSON.stringify(user.avatar));
 
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
+        setRole(user.role)
+        setUsername(user.username)
+        setAvatar(user.avatar)
     }
-
-    const saveUsername = (username) => {
-        localStorage.setItem('username', JSON.stringify(username));
-
-        setUsername(username);
-    }
-
-    const saveUserRole = (role) => {
-        localStorage.setItem('role', JSON.stringify(role))
-
-        setRole(role)
-    }
-
-    const saveAvatar = (avatar) => {
-        localStorage.setItem('avatar', JSON.stringify(avatar))
-
-        setAvatar(avatar)
-    }
-
 
     const logout = () => {
         localStorage.removeItem('access_token');
-        localStorage.removeItem('username');
         localStorage.removeItem('role');
+        localStorage.removeItem('username');
         localStorage.removeItem('avatar');
 
         dispatch(removeAvatar(''));
@@ -120,19 +102,16 @@ export default function AuthUser() {
 
     return {
         http,
-        username,
         accessToken,
         refreshToken,
         role,
+        username,
         avatar,
         hasAccessToken,
         hasRefreshToken,
         hasUsername,
         setAuthorizationHeader,
         saveToken,
-        saveUsername,
-        saveUserRole,
-        saveAvatar,
         logout,
     }
 }

@@ -54,7 +54,7 @@ const Register = () => {
   const [form] = Form.useForm();
   
   const onFinish = (values) => {
-    const DEFAULT_USER_AVATAR = 'gs://ltd-resort.appspot.com/avatars/default-user-icon.jpg';
+    const DEFAULT_USER_AVATAR = 'gs://pbl6-8431d.appspot.com/avatars/default-user-icon.jpg';
 
     const formData = new FormData();
     
@@ -67,7 +67,6 @@ const Register = () => {
     http.post('/auth/register/', formData)
       .then((resolve) => {
         console.log(resolve);
-        
         Swal.fire(
           'Created!',
           'You have successfully registered an account',
