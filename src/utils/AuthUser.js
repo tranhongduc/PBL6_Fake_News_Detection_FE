@@ -48,7 +48,7 @@ export default function AuthUser() {
     });
 
     const [avatar, setAvatar] = useState(() => {
-        const avatarString = localStorage.getItem('username');
+        const avatarString = localStorage.getItem('avatar');
         const avatar = JSON.parse(avatarString);
         return avatar;
     });
