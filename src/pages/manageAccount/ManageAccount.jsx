@@ -29,14 +29,14 @@ const ManageAccount = () => {
 
   const { http, accessToken, setAuthorizationHeader } = AuthUser();
 
-  // Fetch acustomer info state
+  // Fetch user info state
   const [userInfo, setUserInfo] = useState({});
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageUpload, setImageUpload] = useState(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [imageUpload, setImageUpload] = useState(null);
 
   const [current, setCurrent] = useState(0);
   const onChange = (value) => {
@@ -89,7 +89,7 @@ const ManageAccount = () => {
       getDownloadURL(avatarRef).then((url) => {
         // Upload ảnh lên Firebase Storage
         const formData = new FormData();
-
+        
         formData.append('avatar', url);
 
         http.patch(`user/update-avatar`, formData)
@@ -106,6 +106,13 @@ const ManageAccount = () => {
           })
           .catch((reject) => {
             console.log(reject);
+            Swal.fire(
+              'Error!',
+              'Oops... Try again',
+              'error'
+            ).then(() => {
+              navigate(0);
+            })
           })
       })
     })
@@ -150,6 +157,7 @@ const ManageAccount = () => {
     }
 
     fetchData();
+    setIsLoading(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
