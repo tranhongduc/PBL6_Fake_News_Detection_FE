@@ -49,7 +49,7 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const { http, refreshToken, saveToken, saveUsername, saveUserRole, saveAvatar, setAuthorizationHeader } = AuthUser();
+  const { http, refreshToken, saveToken, setAuthorizationHeader } = AuthUser();
   const [form] = Form.useForm();
 
   const ROLE_ADMIN = "admin";
@@ -67,14 +67,12 @@ const Login = () => {
 
     http.post("/auth/login/", formData)
       .then((resolve) => {
-        console.log(resolve);
+        console.log('Resolve:',resolve);
 
         const { access_token, refresh_token } = resolve.data;
         const user = resolve.data.user;
-        saveToken(access_token, refresh_token);
-        saveUsername(user.username);
-        saveUserRole(user.role);
-        saveAvatar(user.avatar);
+
+        saveToken(access_token, refresh_token, user);
 
         if (user.role === ROLE_USER) {
           navigate("/")
