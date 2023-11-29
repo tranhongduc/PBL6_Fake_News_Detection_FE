@@ -35,6 +35,12 @@ export default function AuthUser() {
         return refreshToken;
     });
 
+    const [userId, setUserId] = useState(() => {
+        const userIdString = localStorage.getItem('user_id');
+        const userId = JSON.parse(userIdString);
+        return userId;
+    });
+
     const [role, setRole] = useState(() => {
         const roleString = localStorage.getItem('role');
         const role = JSON.parse(roleString);
@@ -56,14 +62,16 @@ export default function AuthUser() {
     const dispatch = useDispatch();
 
     const saveToken = (accessToken, refreshToken, user) => {
-        localStorage.setItem('access_token', JSON.stringify(accessToken));
-        localStorage.setItem('refresh_token', JSON.stringify(refreshToken));
-        localStorage.setItem('role', JSON.stringify(user.role));
-        localStorage.setItem('username', JSON.stringify(user.username));
-        localStorage.setItem('avatar', JSON.stringify(user.avatar));
+        localStorage.setItem('access_token', JSON.stringify(accessToken))
+        localStorage.setItem('refresh_token', JSON.stringify(refreshToken))
+        localStorage.setItem('user_id', JSON.stringify(user.id))
+        localStorage.setItem('role', JSON.stringify(user.role))
+        localStorage.setItem('username', JSON.stringify(user.username))
+        localStorage.setItem('avatar', JSON.stringify(user.avatar))
 
-        setAccessToken(accessToken);
-        setRefreshToken(refreshToken);
+        setAccessToken(accessToken)
+        setRefreshToken(refreshToken)
+        setUserId(user.id)
         setRole(user.role)
         setUsername(user.username)
         setAvatar(user.avatar)
@@ -71,6 +79,7 @@ export default function AuthUser() {
 
     const logout = () => {
         localStorage.removeItem('access_token');
+        localStorage.removeItem('user_id');
         localStorage.removeItem('role');
         localStorage.removeItem('username');
         localStorage.removeItem('avatar');
@@ -104,6 +113,7 @@ export default function AuthUser() {
         http,
         accessToken,
         refreshToken,
+        userId,
         role,
         username,
         avatar,

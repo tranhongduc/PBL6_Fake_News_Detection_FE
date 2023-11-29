@@ -48,7 +48,7 @@ const Profile = ({ userInfo }) => {
     },
   };
 
-  
+
   const [openModalUpdateInfo, setOpenModalUpdateInfo] = useState(false);
   const [openModalUpdatePassword, setOpenModalUpdatePassword] = useState(false);
 
@@ -205,9 +205,6 @@ const Profile = ({ userInfo }) => {
     });
   };
 
-
-
-
   return (
     <div className={cx("account-info-wrapper")}>
       <div className={cx("account-info-wrapper__top")}>
@@ -239,7 +236,7 @@ const Profile = ({ userInfo }) => {
             <div className={cx("content-text")}>{userInfo?.username ?? "No information provided"}</div>
           </div>
           <div className={cx("info-container__right")}>
-            {userInfo?.name ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
+            {userInfo?.username !== undefined ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
           </div>
         </div>
         <div className={cx("info-container")}>
@@ -250,7 +247,7 @@ const Profile = ({ userInfo }) => {
             <div className={cx("content-text")}>{userInfo?.email ?? "No information provided"}</div>
           </div>
           <div className={cx("info-container__right")}>
-            {userInfo?.gender ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
+            {userInfo?.email !== undefined ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
           </div>
         </div>
         <div className={cx("info-container")}>
@@ -261,7 +258,7 @@ const Profile = ({ userInfo }) => {
             <div className={cx("content-text")}>{moment(userInfo?.created_at).format('DD/MM/YYYY') ?? "No information provided"}</div>
           </div>
           <div className={cx("info-container__right")}>
-            {userInfo?.name ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
+            {moment(userInfo?.created_at).format('DD/MM/YYYY') ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
           </div>
         </div>
         <div className={cx("info-container")}>
@@ -269,10 +266,20 @@ const Profile = ({ userInfo }) => {
             <div className={cx("title-text")}>
               <p>Number of followers</p>
             </div>
-            <div className={cx("content-text")}>{userInfo?.name ?? "No information provided"}</div>
+            <div className={cx("content-text")}>
+              {userInfo?.total_following_you !== undefined ? (
+                userInfo.total_following_you <= 1 ? (
+                  `${userInfo.total_following_you} Follower`
+                ) : (
+                  `${userInfo.total_following_you} Followers`
+                )
+              ) : (
+                "No information provided"
+              )}
+            </div>
           </div>
           <div className={cx("info-container__right")}>
-            {userInfo?.name ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
+            {userInfo?.total_following_you !== undefined ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
           </div>
         </div>
         <div className={cx("info-container")}>
@@ -280,10 +287,20 @@ const Profile = ({ userInfo }) => {
             <div className={cx("title-text")}>
               <p>Number of following</p>
             </div>
-            <div className={cx("content-text")}>{userInfo?.name ?? "No information provided"}</div>
+            <div className={cx("content-text")}>
+              {userInfo?.total_you_follow !== undefined ? (
+                userInfo.total_you_follow <= 1 ? (
+                  `${userInfo.total_you_follow} Following`
+                ) : (
+                  `${userInfo.total_you_follow} Followings`
+                )
+              ) : (
+                "No information provided"
+              )}
+            </div>
           </div>
           <div className={cx("info-container__right")}>
-            {userInfo?.name ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
+            {userInfo?.total_you_follow !== undefined ? <FaCheckCircle /> : <FaInfoCircle style={{ color: 'grey' }} />}
           </div>
         </div>
       </div>
