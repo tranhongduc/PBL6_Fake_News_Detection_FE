@@ -15,16 +15,6 @@ const cx = classNames.bind(styles);
 const Blog = () => {
   const { http } = AuthUser();
 
-  // Fetch categories state
-  const [categories, setCategories] = useState([]);
-
-  const getCategoryNameById = (categoryId) => {
-    if (categoryId !== undefined) {
-      const category = categories.find(category => category.id === categoryId)
-      return category.name
-    }
-  }
-
   // Fetch image state
   const [imageUrl, setImageUrl] = useState({});
 
@@ -68,35 +58,10 @@ const Blog = () => {
   // --------------------------     Fetch API     --------------------------
   useEffect(() => {
     const fetchData = () => {
-      http.get('user/news/total')
-        .then((resolve) => {
-          console.log('Total news:', resolve.data)
-          setTotalNews(resolve.data.news_count)
-        })
-        .catch((reject) => {
-          console.log('Error:', reject)
-        })
-
-      http.get('user/categories')
-        .then((resolve) => {
-          console.log('Categories:', resolve.data)
-          setCategories(resolve.data.categories)
-        })
-        .catch((reject) => {
-          console.log('Error:', reject)
-        })
-    }
-
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const fetchData = () => {
-      http.get(`user/paging?page_number=${currentPage}&page_size=${pageSize}`)
+      http.get(`user/list_news_user/${pageSize}/${currentPage}`)
         .then((resolve) => {
           console.log('List news:', resolve.data)
-          const listNews = resolve.data.list_news
+          const listNews = resolve.data.news
 
           const newListNews = listNews.map((news) => ({
             ...news,
@@ -104,6 +69,8 @@ const Blog = () => {
           }));
           console.log('New list news:', newListNews)
           setListNews(newListNews);
+
+          setTotalNews(resolve.data.news_count)
 
           // Lấy URL cho từng tin tức
           newListNews.forEach((news) => {
@@ -128,41 +95,57 @@ const Blog = () => {
   }, [imageUrl]);
 
   return (
-    <section className={cx("blog")}>
-      <div className={cx("blog__container")}>
-        {listNews.map((news) => (
-          <div className={cx("boxItems")} key={news.id}>
-            <div className={cx("img")}>
-              <Link to={`/details/${news.id}`}>
-                <LazyLoadImage
-                  key={news.id}
-                  src={imageUrl[news.id] || ''}
-                  alt={`Blog ${news.id}`}
-                  effect="blur"
-                />
-              </Link>
-            </div>
-            <div className={cx("details")}>
-              <div className={cx("tag")}>
-                <AiOutlineTags className={cx("icon")} />
-                <Link to={'/'}>
-                  {getCategoryNameById(news.category)}
+    <div className={cx("blog-container")}>
+      <div className={cx("blog-container__top")}>
+        <div className={cx("top-left")}>
+          {listNews.map((news) => (
+            <div className={cx("boxItems")} key={news.id}>
+              <div className={cx("img")}>
+                <Link 
+                  to={`/details/${news.id}`}
+                  state={{
+                    isEditAllowed: false,
+                  }}
+                >
+                  <LazyLoadImage
+                    key={news.id}
+                    src={imageUrl[news.id] || ''}
+                    alt={`Blog ${news.id}`}
+                    effect="blur"
+                  />
                 </Link>
               </div>
-              <Link to={`/details/${news.id}`} className={cx("link")}>
-                <h3>{news.title}</h3>
-              </Link>
-              <p>{news.text.slice(0, 180)}...</p>
-              <div className={cx("date")}>
-                <AiOutlineClockCircle className={cx("icon")} /> <label htmlFor='date'>{format(new Date(news.created_at), 'dd/MM/yyyy')}</label>
-                <AiOutlineComment className={cx("icon")} /> <label htmlFor='comment'>27</label>
-                <AiOutlineShareAlt className={cx("icon")} /> <label htmlFor='share'>SHARE</label>
+              <div className={cx("details")}>
+                <div className={cx("tag")}>
+                  <AiOutlineTags className={cx("icon")} />
+                  <Link to={'/'}>
+                    {news.category}
+                  </Link>
+                </div>
+                <Link 
+                  to={`/details/${news.id}`}
+                  state={{
+                    isEditAllowed: false,
+                  }}
+                  className={cx("link")}
+                >
+                  <h3>{news.title}</h3>
+                </Link>
+                <p>{news.text.slice(0, 180)}...</p>
+                <div className={cx("date")}>
+                  <AiOutlineClockCircle className={cx("icon")} /> <label htmlFor='date'>{format(new Date(news.created_at), 'dd/MM/yyyy')}</label>
+                  <AiOutlineComment className={cx("icon")} /> <label htmlFor='comment'>{news.comments_count}</label>
+                  <AiOutlineShareAlt className={cx("icon")} /> <label htmlFor='share'>SHARE</label>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="top-right">
+
+        </div>
       </div>
-      <div className={cx("list-news-pagination")}>
+      <div className={cx("blog-container__bottom")}>
         <Pagination
           current={currentPage}
           defaultCurrent={DEFAULT_CURRENT_PAGE_NUMBER}
@@ -176,7 +159,7 @@ const Blog = () => {
           onShowSizeChange={handleShowSizeChange}
         />
       </div>
-    </section>
+    </div>
   )
 }
 

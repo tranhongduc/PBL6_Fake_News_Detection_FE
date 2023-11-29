@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 const cx = classNames.bind(styles);
 
 const Create = () => {
-  const { http } = AuthUser();
+  const { http, accessToken, setAuthorizationHeader } = AuthUser();
   const inputRef = useRef(null);
   const [image, setImage] = useState("");
   const [value, setValue] = useState('')
@@ -56,7 +56,11 @@ const Create = () => {
     formData.append('category', category)
     formData.append('text', text)
 
-    http.patch('api/user/news/create/', formData)
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken);
+    }
+
+    http.post('user/news/store/', formData)
       .then(() => {
         Swal.fire(
           'Ta~Da~',
@@ -98,14 +102,19 @@ const Create = () => {
 
   // --------------------------     Fetch API     --------------------------
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseData = await http.get('api/user/categories')
-        console.log('Response Data:', responseData.data)
-        setListCategories(responseData.data.categories)
-      } catch (error) {
-        console.log('Error:', error)
-      }
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken);
+    }
+
+    const fetchData = () => {
+      http.get('user/categories')
+        .then((resolve) => {
+          console.log('Response Data:', resolve.data)
+          setListCategories(resolve.data.categories)
+        })
+        .catch((reject) => {
+          console.log('Error:', reject)
+        })
     }
 
     fetchData()

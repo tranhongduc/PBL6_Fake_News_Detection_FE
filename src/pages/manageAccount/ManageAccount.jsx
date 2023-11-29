@@ -27,7 +27,7 @@ const cx = classNames.bind(styles);
 
 const ManageAccount = () => {
 
-  const { http, accessToken, setAuthorizationHeader } = AuthUser();
+  const { http, accessToken, userId, setAuthorizationHeader } = AuthUser();
 
   // Fetch user info state
   const [userInfo, setUserInfo] = useState({});
@@ -146,10 +146,10 @@ const ManageAccount = () => {
     }
 
     const fetchData = () => {
-      http.get(`/auth/get-user-info`)
+      http.get(`/admin/detail-user/${userId}`)
         .then((resolve) => {
           console.log(resolve);
-          setUserInfo(resolve.data.user);
+          setUserInfo(resolve.data);
         })
         .catch((reject) => {
           console.log(reject);
