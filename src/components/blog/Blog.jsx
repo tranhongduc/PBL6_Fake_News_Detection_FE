@@ -5,18 +5,24 @@ import { AiOutlineTags, AiOutlineComment, AiOutlineShareAlt, AiOutlineClockCircl
 import { Link } from "react-router-dom"
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import AuthUser from "../../utils/AuthUser";
-import { Pagination } from "antd";
+import { Select, Pagination } from "antd";
 import { storage } from '../../utils/firebase'
 import { ref, getDownloadURL } from "firebase/storage"
 import { format } from 'date-fns';
+import SearchBar from '../searchBar/SearchBar'
+import { FaSearch } from 'react-icons/fa'
+import { toast } from 'react-toastify';
 
 const cx = classNames.bind(styles);
 
 const Blog = () => {
-  const { http } = AuthUser();
+  const { http, accessToken, setAuthorizationHeader } = AuthUser();
 
   // Fetch image state
   const [imageUrl, setImageUrl] = useState({});
+  const [isOnSearchMode, setIsOnSearchMode] = useState(false)
+  const [listCategories, setListCategories] = useState([])
+  const [category, setCategory] = useState('')
 
   const getFirebaseImageURL = async (imagePath, newsId) => {
     const imageRef = ref(storage, imagePath);
@@ -55,10 +61,22 @@ const Blog = () => {
     setPageSize(pageSize);
   }
 
-  // --------------------------     Fetch API     --------------------------
-  useEffect(() => {
+  // --------------------------     Handle Search     --------------------------
+  const [input, setInput] = useState('')
+
+  const onChange = (e) => {
+    setInput(e)
+  }
+
+  const handleClickSearch = () => {
+    if (input.length != 0 && input.trim() != "") {
+      setIsOnSearchMode(true)
+    } else {
+      setIsOnSearchMode(false)
+    }
+
     const fetchData = () => {
-      http.get(`user/list_news_user/${pageSize}/${currentPage}`)
+      http.get(`user/search/${pageSize}/${currentPage}/?search=${input}&category=${category}`)
         .then((resolve) => {
           console.log('List news:', resolve.data)
           const listNews = resolve.data.news
@@ -76,11 +94,112 @@ const Blog = () => {
           newListNews.forEach((news) => {
             getFirebaseImageURL(news.image, news.id);
           });
+
+          toast.success(`Search news successfull`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
         })
         .catch((reject) => {
           console.log('Error:', reject);
+          toast.error('Oops. Try again', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
         });
     };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }
+
+  const onChangeCategory = (value) => {
+    setCategory(value)
+  }
+
+  // --------------------------     Fetch API     --------------------------
+  useEffect(() => {
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken);
+    }
+
+    const fetchData = () => {
+      http.get('admin/categories_list')
+        .then((resolve) => {
+          console.log('Response Data:', resolve.data)
+          setListCategories(resolve.data.categories)
+        })
+        .catch((reject) => {
+          console.log('Error:', reject)
+        })
+    }
+
+    fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const fetchData = () => {
+      if (isOnSearchMode) {
+        http.get(`user/search/${pageSize}/${currentPage}/?search=${input}`)
+          .then((resolve) => {
+            console.log('List news:', resolve.data)
+            const listNews = resolve.data.news
+
+            const newListNews = listNews.map((news) => ({
+              ...news,
+              imageUrl: '',
+            }));
+            console.log('New list news:', newListNews)
+            setListNews(newListNews);
+
+            setTotalNews(resolve.data.news_count)
+
+            // Lấy URL cho từng tin tức
+            newListNews.forEach((news) => {
+              getFirebaseImageURL(news.image, news.id);
+            });
+          })
+          .catch((reject) => {
+            console.log('Error:', reject);
+          });
+      } else {
+        http.get(`user/list_news_user/${pageSize}/${currentPage}`)
+          .then((resolve) => {
+            console.log('List news:', resolve.data)
+            const listNews = resolve.data.news
+
+            const newListNews = listNews.map((news) => ({
+              ...news,
+              imageUrl: '',
+            }));
+            console.log('New list news:', newListNews)
+            setListNews(newListNews);
+
+            setTotalNews(resolve.data.news_count)
+
+            // Lấy URL cho từng tin tức
+            newListNews.forEach((news) => {
+              getFirebaseImageURL(news.image, news.id);
+            });
+          })
+          .catch((reject) => {
+            console.log('Error:', reject);
+          });
+      }
+    }
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,12 +215,36 @@ const Blog = () => {
 
   return (
     <div className={cx("blog-container")}>
+      <div className={cx("search-bar-container")}>
+        <SearchBar input={input} handleChangeInput={onChange} />
+        <button
+          className={cx("btn-search-wrapper")}
+          onClick={handleClickSearch}
+        >
+          <FaSearch />
+        </button>
+        <Select className={cx("categories-options")} onChange={onChangeCategory} placeholder="Select category">
+          <Select.Option value={''}>All</Select.Option>
+          {
+            listCategories.map((category) => {
+              return (
+                <Select.Option
+                  key={category.id}
+                  value={category.id}
+                >
+                  {category.name}
+                </Select.Option>
+              )
+            })
+          }
+        </Select>
+      </div>
       <div className={cx("blog-container__top")}>
         <div className={cx("top-left")}>
           {listNews.map((news) => (
             <div className={cx("boxItems")} key={news.id}>
               <div className={cx("img")}>
-                <Link 
+                <Link
                   to={`/details/${news.id}`}
                   state={{
                     isEditAllowed: false,
@@ -122,7 +265,7 @@ const Blog = () => {
                     {news.category}
                   </Link>
                 </div>
-                <Link 
+                <Link
                   to={`/details/${news.id}`}
                   state={{
                     isEditAllowed: false,
