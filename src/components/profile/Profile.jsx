@@ -1,32 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import styles from "./Profile.module.scss";
 import classNames from "classnames/bind";
 import Draggable from 'react-draggable';
 import Swal from "sweetalert2";
 import AuthUser from '../../utils/AuthUser';
-import FormattedDate from '../../utils/FormattedDate';
-import dayjs from 'dayjs';
-import { avatarSelector } from '../../redux/selectors';
-import { useDispatch, useSelector } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen } from '@fortawesome/free-solid-svg-icons'
-import { MdDiamond } from 'react-icons/md';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
-import { v4 } from "uuid";
-import { storage } from '../../utils/firebase'
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
-import { addAvatar } from '../../redux/actions';
-import { DatePicker, Divider, Form, Input, Modal, Select, Button } from 'antd';
+import { Divider, Form, Input, Modal, Button } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
-import { FaCheckCircle, FaInfoCircle, FaUser, FaAsterisk } from 'react-icons/fa';
+import { FaCheckCircle, FaInfoCircle, FaUser } from 'react-icons/fa';
 import { GrShieldSecurity } from 'react-icons/gr'
 import moment from 'moment/moment';
 
 const cx = classNames.bind(styles)
 
 const Profile = ({ userInfo }) => {
-  const { http } = AuthUser();
+  const { http, accessToken, setAuthorizationHeader, updateProfile } = AuthUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -83,26 +73,28 @@ const Profile = ({ userInfo }) => {
     setOpenModalUpdatePassword(false);
   }
 
+  // ---------------------------  Handle Update Info  ---------------------------
+
   // Successful case
   const onFinishUpdateProfile = (values) => {
-    const { fullName, gender, birthDate, email, ID_Card, address, phone } = values;
+    const { username, email } = values;
     const formData = new FormData();
 
-    formData.append('full_name', fullName);
-    formData.append('gender', gender);
-    formData.append('birthday', FormattedDate(birthDate));
+    formData.append('username', username);
     formData.append('email', email);
-    formData.append('CMND', ID_Card);
-    formData.append('address', address);
-    formData.append('phone', phone);
 
-    http.patch(`/customer/update-customer`, formData)
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken)
+    }
+
+    http.put('admin/update_profile/', formData)
       .then(() => {
         Swal.fire(
           'Update!',
           'You have successfully update your profile',
           'success'
         ).then(() => {
+          updateProfile(username)
           navigate(0);
         })
       })
@@ -136,20 +128,26 @@ const Profile = ({ userInfo }) => {
     })
   }
 
+  // ---------------------------  Handle Change Password  ---------------------------
+
   // Successful case
   const onFinishUpdatePassword = (values) => {
     const formData = new FormData();
 
-    formData.append('current_password', values.currentPassword);
-    formData.append('new_password', values.newPassword);
-    formData.append('confirm_password', values.confirmNewPassword);
+    formData.append('old_password', values.old_password);
+    formData.append('new_password', values.new_password);
+    formData.append('confirm_new_password', values.confirm_new_password);
+    
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken)
+    }
 
-    http.patch('/auth/changePassword', formData)
+    http.put('auth/change_password/', formData)
       .then((resolve) => {
         console.log(resolve);
         Swal.fire(
           'Successfully Update Password!',
-          'You have successfully update your password',
+          'You\'ve successfully updated your password',
           'success'
         ).then(() => {
           navigate(0);
@@ -157,7 +155,16 @@ const Profile = ({ userInfo }) => {
       })
       .catch((reject) => {
         console.log(reject);
-        const errorMsg = reject.response.data.message;
+        const { new_password, confirm_new_password } = reject.response.data;
+        
+        if (new_password != null) {
+          var errorMsg = new_password[0];
+        } else if (confirm_new_password != null) { 
+          var errorMsg = confirm_new_password[0];
+        }
+        else {
+          errorMsg = 'Oops. Try again';
+        }
         Swal.fire(
           'Oops!',
           `${errorMsg}`,
@@ -304,6 +311,7 @@ const Profile = ({ userInfo }) => {
           </div>
         </div>
       </div>
+      {/* Update Info Modal */}
       <Modal
         title={
           <div
@@ -351,45 +359,35 @@ const Profile = ({ userInfo }) => {
           onFinishFailed={onFinishUpdateProfileFailed}
           className={cx("modal-form")}
           initialValues={{
-            'fullName': userInfo?.name,
-            'gender': userInfo?.gender,
-            'birthDate': userInfo?.birthday ? dayjs(userInfo?.birthday) : dayjs(),
-            'ID_Card': userInfo?.CMND,
-            'address': userInfo?.address,
-            'phone': userInfo?.phone,
+            'username': userInfo?.username,
+            'email': userInfo?.email,
           }}
         >
           <Form.Item
-            name='fullName'
-            label="Full Name"
+            name='username'
+            label="User Name"
             rules={[
               {
                 required: true,
-                message: 'Full name is required!'
+                message: 'User Name is required!'
               },
             ]}
             hasFeedback
           >
-            <Input
-              placeholder={userInfo?.full_name}
-            />
+            <Input />
           </Form.Item>
           <Form.Item
-            name="gender"
-            label="Gender"
-            hasFeedback
+            name='email'
+            label="Email"
             rules={[
               {
                 required: true,
-                message: 'Gender is required!',
+                message: 'Email is required!'
               },
             ]}
+            hasFeedback
           >
-            <Select placeholder="Please select gender">
-              <Select.Option value="Male">Male</Select.Option>
-              <Select.Option value="Female">Female</Select.Option>
-              <Select.Option value="Other">Other</Select.Option>
-            </Select>
+            <Input />
           </Form.Item>
           <Form.Item
             wrapperCol={24}
@@ -402,6 +400,7 @@ const Profile = ({ userInfo }) => {
           </Form.Item>
         </Form>
       </Modal>
+      {/* Change Password Modal */}
       <Modal
         title={
           <div
@@ -451,21 +450,21 @@ const Profile = ({ userInfo }) => {
           className={cx("modal-form")}
         >
           <Form.Item
-            label="Current Password"
-            name="currentPassword"
+            label="Old Password"
+            name="old_password"
             rules={[
               {
                 required: true,
-                message: 'Current password is required!',
+                message: 'Old password is required!',
               },
             ]}
             hasFeedback
           >
-            <Input.Password placeholder='Enter current password' />
+            <Input.Password placeholder='Enter old password' />
           </Form.Item>
           <Form.Item
             label="New Password"
-            name="newPassword"
+            name="new_password"
             rules={[
               {
                 required: true,
@@ -478,7 +477,7 @@ const Profile = ({ userInfo }) => {
           </Form.Item>
           <Form.Item
             label="Confirm New Password"
-            name="confirmNewPassword"
+            name="confirm_new_password"
             dependencies={['newPassword']}
             hasFeedback
             rules={[
@@ -488,7 +487,7 @@ const Profile = ({ userInfo }) => {
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue('newPassword') === value) {
+                  if (!value || getFieldValue('new_password') === value) {
                     return Promise.resolve();
                   }
                   return Promise.reject(new Error('The two passwords that you entered do not match!'));
