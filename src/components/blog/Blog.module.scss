@@ -3,6 +3,29 @@
     padding: 50px 0;
     background: #F9F9F9;
 
+    .search-bar-container {
+        padding: 0 20px 20px;
+        width: 50%;
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        min-width: 200px;
+
+        .btn-search-wrapper {
+            background-color: #ff8682;
+            border: 1px solid #000;
+            border-radius: 6px;
+            padding: 0 14px;
+            transition: 0.3s;
+
+            &:hover {
+                opacity: 0.8;
+                cursor: pointer;
+            }
+        }
+    }
+
     &__top {
         max-width: 95%;
         margin: auto;
@@ -134,4 +157,8 @@
             }
         }
     }
+}
+
+.categories-options {
+    width: 26% !important;
 }
