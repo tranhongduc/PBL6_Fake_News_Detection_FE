@@ -21,12 +21,21 @@ const TextEditor = ({ value, onChange }) => {
       [{ 'font': [] }],
       [{ 'align': [] }],
 
-      ['clean']
+      ['clean'] // remove formatting button
     ],
+    // imageResize: {
+    //   displaySize: true,
+    // },
+    // imageDrop: true,
+    // clipboard: {
+    //   matchVisual: false,
+    // },
   };
 
   const formats = [
     "header",
+    "font",
+    "size",
     "bold",
     "italic",
     "underline",
@@ -36,8 +45,10 @@ const TextEditor = ({ value, onChange }) => {
     "bullet",
     "indent",
     "link",
-    "code"
-  ];
+    "image",
+    "video",
+    "code-block",
+  ]
 
   const handleOnChange = (newVal) => {
     if (newVal.replace(/<(.|\n)*?>/g, "").trim().length === 0) {
