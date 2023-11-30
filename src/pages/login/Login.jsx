@@ -49,9 +49,17 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const { http, refreshToken, saveToken, saveUsername, saveUserRole, setAuthorizationHeader } = AuthUser();
+  const {
+    http,
+    refreshToken,
+    saveToken,
+    saveUsername,
+    saveUserRole,
+    saveUserId,
+    setAuthorizationHeader,
+  } = AuthUser();
   const [form] = Form.useForm();
-  
+
   const ROLE_ADMIN = "admin";
   const ROLE_USER = "user";
 
@@ -65,7 +73,8 @@ const Login = () => {
       setAuthorizationHeader(refreshToken);
     }
 
-    http.post("/auth/login/", formData)
+    http
+      .post("/auth/login/", formData)
       .then((resolve) => {
         console.log(resolve);
 
@@ -74,9 +83,10 @@ const Login = () => {
         saveToken(access_token, refresh_token);
         saveUsername(user.username);
         saveUserRole(user.role);
+        saveUserId(user.id);
 
         if (user.role === ROLE_USER) {
-          navigate("/")
+          navigate("/");
           toast.success(`Welcome back ${user.username}`, {
             position: "top-right",
             autoClose: 3000,

@@ -3,9 +3,8 @@ import React, { useState, useEffect } from "react";
 import ClearIcon from "@mui/icons-material/Clear";
 import CheckIcon from "@mui/icons-material/Check";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, useTheme } from "@mui/material";
+import { Box, useTheme, MenuItem, Pagination, Select } from "@mui/material";
 import { tokens } from "../../theme";
-import { mockDataTeam } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useLocation } from "react-router-dom";
 import AuthUser from "../../../../utils/AuthUser";
@@ -14,6 +13,9 @@ const ViewCategory = (params) => {
   const { http } = AuthUser();
   const location = useLocation();
   const { state } = location;
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [category, setCategoryr] = useState();
@@ -35,8 +37,8 @@ const ViewCategory = (params) => {
       flex: 0.5,
     },
     {
-      field: "category",
-      headerName: "Category",
+      field: "comments_count",
+      headerName: "Comment",
       flex: 0.5,
     },
     {
@@ -63,6 +65,45 @@ const ViewCategory = (params) => {
     },
   ];
 
+  //CUSTOM DATAGRID
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    setPageSize(newPageSize);
+    setPage(1); // Reset về trang đầu tiên khi thay đổi kích thước trang
+  };
+
+  const CustomPagination = () => (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <Pagination
+        count={Math.ceil(news.length / pageSize)}
+        page={page}
+        onChange={handlePageChange}
+        showFirstButton
+        showLastButton
+        boundaryCount={2}
+        siblingCount={2}
+        style={{ marginRight: "20px" }}
+      />
+      <Select
+        value={pageSize}
+        onChange={(e) => handlePageSizeChange(e.target.value)}
+        style={{ marginRight: "20px" }}
+      >
+        <MenuItem value={5}>5</MenuItem>
+        <MenuItem value={10}>10</MenuItem>
+        <MenuItem value={20}>20</MenuItem>
+      </Select>
+    </div>
+  );
+
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const displayedRows = news.slice(startIndex, endIndex);
+
   useEffect(() => {
     const fetchData = async () => {
       const id = state?.id;
@@ -88,59 +129,65 @@ const ViewCategory = (params) => {
 
   console.log("111 ", state);
   return (
-    <div>
-      <div>
-        <Header title="CATEGORY DETAIL" subtitle="Category Detail" />
-        <div className="account-info">
-          <div className="info-container">
-            <div className="title-text">Category Name</div>
-            <div className="content-text">{state?.name}</div>
-          </div>
-          <div className="info-container">
-            <div className="title-text">Number of news</div>
-            <div className="content-text">{state?.news_count}</div>
-          </div>
+    <Box m="20px">
+      <Header title="CATEGORY DETAIL" subtitle="Category Detail" />
+      <div className="account-info">
+        <div className="info-container">
+          <div className="title-text">Category Name: </div>
+          <div className="content-text">{state?.name}</div>
         </div>
-        <div className="news-comment">
-          <div className="new">
-            <div>
-              <Box
-                m="40px 0 0 0"
-                height="75vh"
-                sx={{
-                  "& .MuiDataGrid-root": {
-                    border: "none",
-                  },
-                  "& .MuiDataGrid-cell": {
-                    borderBottom: "none",
-                  },
-                  "& .name-column--cell": {
-                    color: colors.greenAccent[300],
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor: colors.blueAccent[700],
-                    borderBottom: "none",
-                  },
-                  "& .MuiDataGrid-virtualScroller": {
-                    backgroundColor: colors.primary[400],
-                  },
-                  "& .MuiDataGrid-footerContainer": {
-                    borderTop: "none",
-                    backgroundColor: colors.blueAccent[700],
-                  },
-                  "& .MuiCheckbox-root": {
-                    color: `${colors.greenAccent[200]} !important`,
-                  },
-                  "& .MuiDataGrid-root": { fontSize: "1.5rem" },
-                }}
-              >
-                <DataGrid rows={news} columns={newsColumns} />
-              </Box>{" "}
-            </div>
-          </div>
+        <div className="info-container">
+          <div className="title-text">Number of news: </div>
+          <div className="content-text">{state?.news_count}</div>
         </div>
       </div>
-    </div>
+      <Box
+        m="40px 0 0 0"
+        height="75vh"
+        sx={{
+          "& .MuiDataGrid-root": {
+            border: "none",
+          },
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+          },
+          "& .name-column--cell": {
+            color: colors.greenAccent[300],
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: colors.blueAccent[700],
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+            backgroundColor: colors.blueAccent[700],
+          },
+          "& .MuiCheckbox-root": {
+            color: `${colors.greenAccent[200]} !important`,
+          },
+          "& .MuiDataGrid-root": { fontSize: "1.5rem" },
+        }}
+      >
+        <DataGrid
+          rows={displayedRows}
+          columns={newsColumns}
+          pagination
+          disableRowSelectionOnClick={true}
+          pageSize={pageSize}
+          rowCount={news.length}
+          paginationMode="client"
+          page={page}
+          onPageChange={handlePageChange}
+          onPageSizeChange={(newPageSize) => handlePageSizeChange(newPageSize)}
+          slots={{
+            pagination: CustomPagination,
+          }}
+        />
+      </Box>
+    </Box>
   );
 };
 

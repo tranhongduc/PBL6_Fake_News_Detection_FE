@@ -1,5 +1,12 @@
 import "./Manage.css";
-import { Box, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  useTheme,
+  MenuItem,
+  Pagination,
+  Select,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { mockDataTeam } from "../../data/mockData";
@@ -16,13 +23,16 @@ import AuthUser from "../../../../utils/AuthUser";
 const Manage = () => {
   const { http } = AuthUser();
   const navigate = useNavigate();
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+
   const theme = useTheme();
   const [adminList, setAdminList] = useState([]);
   const colors = tokens(theme.palette.mode);
   const columns = [
     { field: "id", headerName: "ID" },
     {
-      field: "username",
+      field: "adminname",
       headerName: "User Name",
       flex: 1,
     },
@@ -35,20 +45,58 @@ const Manage = () => {
       field: "status",
       headerName: "Status",
       flex: 1,
-      renderCell: ({ row: { Status } }) => {
-        if (Status === "active") return <CheckIcon />;
+      renderCell: ({ row: { status } }) => {
+        if (status === "active") return <CheckIcon />;
         else return <ClearIcon />;
       },
     },
   ];
 
+  //CUSTOM DATAGRID
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    setPageSize(newPageSize);
+    setPage(1); // Reset về trang đầu tiên khi thay đổi kích thước trang
+  };
+
+  const CustomPagination = () => (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <Pagination
+        count={Math.ceil(adminList.length / pageSize)}
+        page={page}
+        onChange={handlePageChange}
+        showFirstButton
+        showLastButton
+        boundaryCount={2}
+        siblingCount={2}
+        style={{ marginRight: "20px" }}
+      />
+      <Select
+        value={pageSize}
+        onChange={(e) => handlePageSizeChange(e.target.value)}
+        style={{ marginRight: "20px" }}
+      >
+        <MenuItem value={5}>5</MenuItem>
+        <MenuItem value={10}>10</MenuItem>
+        <MenuItem value={20}>20</MenuItem>
+      </Select>
+    </div>
+  );
+
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const displayedRows = adminList.slice(startIndex, endIndex);
+
   useEffect(() => {
     const fetchData = async () => {
       await http
-        .get(`/auth/list-admin/`)
+        .get(`admin/list-admin/`)
         .then((resolve) => {
-          console.log(resolve);
-          const dataWithIds = resolve.data.admin_users.map((item, index) => ({
+          const dataWithIds = resolve.data.admins.map((item, index) => ({
             id: index + 1,
             ...item,
           }));
@@ -102,10 +150,27 @@ const Manage = () => {
         }}
       >
         <DataGrid
+          rows={displayedRows}
+          columns={columns}
+          pagination
+          disableRowSelectionOnClick={true}
+          pageSize={pageSize}
+          rowCount={adminList.length}
+          paginationMode="client"
+          page={page}
+          onPageChange={handlePageChange}
+          onRowDoubleClick={handleDoubleClickCell}
+          onPageSizeChange={(newPageSize) => handlePageSizeChange(newPageSize)}
+          slots={{
+            pagination: CustomPagination,
+          }}
+        />
+
+        {/* <DataGrid
           rows={adminList}
           columns={columns}
           onCellClick={handleDoubleClickCell}
-        />
+        /> */}
       </Box>
     </Box>
   );

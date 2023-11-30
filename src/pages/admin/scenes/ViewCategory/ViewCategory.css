@@ -6,3 +6,17 @@
     flex-direction: column;
     width: 100%;
 }
+
+
+.account-info{
+    font-size: xx-large;
+    margin: 10px;
+    .info-container{
+        display: flex;
+        .title-text{
+            width: 25%;
+        }
+    }
+}
+
+

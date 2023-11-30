@@ -12,7 +12,7 @@
     .info-container{
         display: flex;
         .title-text{
-            width: 10%;
+            width: 20%;
         }
     }
 }
@@ -25,21 +25,7 @@
         flex-direction:column;
         width: 50%;
         .title-text{
-            width: 10%;
-        }
-    }
-    .divide{
-        height: auto;
-        font-size: 90px;
-        border: 2px solid;
-        flex-grow: 1;
-    }
-    .comment{
-        display: flex;
-        flex-direction:column;
-        width: 50%;
-        .title-text{
-            width: 10%;
+            width: 20%;
         }
     }
 }

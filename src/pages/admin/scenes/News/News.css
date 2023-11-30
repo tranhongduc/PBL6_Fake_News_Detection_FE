@@ -6,4 +6,9 @@
     flex-direction: column;
     width: 100%;
 }
+.MuiDataGrid-footerContainer.MuiDataGrid-withBorderColor.css-wop1k0-MuiDataGrid-footerContainer{
+    display: flex;
+    justify-content: center;
+    /* background-color: brown !important; */
+}
   

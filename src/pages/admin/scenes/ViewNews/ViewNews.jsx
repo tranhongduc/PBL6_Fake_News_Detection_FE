@@ -5,11 +5,16 @@ import CheckIcon from "@mui/icons-material/Check";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, useTheme } from "@mui/material";
 import { Divider } from "antd";
+import { BsPencilSquare } from "react-icons/bs";
+import { AiOutlineDelete } from "react-icons/ai";
 import { tokens } from "../../theme";
-import { mockDataTeam } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useLocation } from "react-router-dom";
+import { storage } from "../../../../utils/firebase";
+import { ref, getDownloadURL } from "firebase/storage";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 import AuthUser from "../../../../utils/AuthUser";
+import Comments from "../../../../components/comments/Comment";
 
 const ViewNews = (params) => {
   const { http } = AuthUser();
@@ -17,80 +22,38 @@ const ViewNews = (params) => {
   const { state } = location;
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [viewUser, setViewUser] = useState();
-  const [comments, setComments] = useState([]);
-  const [news, setNews] = useState([]);
-  const columns = [
-    {
-      field: "id",
-      headerName: "ID",
-    },
-    {
-      field: "username",
-      headerName: "User Name",
-      flex: 1,
-      cellClassName: "name-column--cell",
-    },
-    {
-      field: "email",
-      headerName: "Email",
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 1,
-    },
-  ];
-  const newsColumns = [
-    {
-      field: "ids",
-      headerName: "ID",
-    },
-    {
-      field: "title",
-      headerName: "Title",
-      flex: 0.5,
-    },
-    {
-      field: "category",
-      headerName: "Category",
-      flex: 0.5,
-    },
-    {
-      field: "created_at",
-      headerName: "Created day",
-      flex: 0.5,
-      valueGetter: (params) => {
-        const createdDate = new Date(params.row.created_at);
-        const day = createdDate.getDate();
-        const month = createdDate.getMonth();
-        const year = createdDate.getFullYear();
-        const time = day + "-" + month + "-" + year;
-        return time;
-      },
-    },
-    {
-      field: "label",
-      headerName: "Label",
-      flex: 1,
-      renderCell: ({ row: { label } }) => {
-        if (label === "real") return <CheckIcon />;
-        else return <ClearIcon />;
-      },
-    },
-  ];
+  const [news, setNews] = useState({});
+  const [comments, setComment] = useState([]);
+
+  const getFirebaseImageURL = async (imagePath, newsId) => {
+    const imageRef = ref(storage, imagePath);
+
+    try {
+      const url = await getDownloadURL(imageRef);
+      return url;
+    } catch (error) {
+      console.error("Error getting image URL", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      const id = state?.id;
-      await http
-        .get(`/admin/detail-news/${id}/`)
-        .then((resolve) => {
-          console.log("data ", resolve);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      try {
+        const id = state?.id;
+        const response = await http.get(`/admin/detail-news/${id}/`);
+        const newsDetail = response.data;
+        const imageUrl = await getFirebaseImageURL(newsDetail.image);
+        newsDetail.imageUrl = imageUrl;
+        setNews(newsDetail);
+
+        const responseComment = await http.get(
+          `/admin/comments_list_by_news/${id}/${1}`
+        );
+        setComment(responseComment.data.comments);
+      } catch (error) {
+        console.log("Error:", error);
+      }
     };
 
     fetchData();
@@ -98,101 +61,57 @@ const ViewNews = (params) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log("111 ", state);
   return (
-    <div>
-      <div>
-        <Header title="STAFF INFO" subtitle="Staff infomation" />
-        <div className="account-info">
-          <div className="info-container">
-            <div className="title-text">Name</div>
-            <div className="content-text">{viewUser?.username}</div>
-          </div>
-          <div className="info-container">
-            <div className="title-text">Email</div>
-            <div className="content-text">{viewUser?.email}</div>
-          </div>
+    <Box m="20px">
+      <Header title="NEWS INFO" subtitle="News infomation" />
+      <div className="account-info">
+        <div className="info-container">
+          <div className="title-text">Author: </div>
+          <div className="content-text">{news?.author}</div>
         </div>
-        <div className="news-comment">
-          <div className="new">
-            <div className="title-text">New</div>
-            <div className="content-text">{viewUser?.news_count}</div>
-            <div>
-              <Box
-                m="40px 0 0 0"
-                height="75vh"
-                sx={{
-                  "& .MuiDataGrid-root": {
-                    border: "none",
-                  },
-                  "& .MuiDataGrid-cell": {
-                    borderBottom: "none",
-                  },
-                  "& .name-column--cell": {
-                    color: colors.greenAccent[300],
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor: colors.blueAccent[700],
-                    borderBottom: "none",
-                  },
-                  "& .MuiDataGrid-virtualScroller": {
-                    backgroundColor: colors.primary[400],
-                  },
-                  "& .MuiDataGrid-footerContainer": {
-                    borderTop: "none",
-                    backgroundColor: colors.blueAccent[700],
-                  },
-                  "& .MuiCheckbox-root": {
-                    color: `${colors.greenAccent[200]} !important`,
-                  },
-                  "& .MuiDataGrid-root": { fontSize: "1.5rem" },
-                }}
-              >
-                <DataGrid rows={news} columns={newsColumns} />
-              </Box>{" "}
-            </div>
-          </div>
-          <Divider type="vertical" className="divide" />
-          <div className="comment">
-            <div className="title-text">Comment</div>
-            <div className="content-text">{viewUser?.comments_count}</div>
-            <div>
-              <Box
-                m="40px 0 0 0"
-                height="75vh"
-                sx={{
-                  "& .MuiDataGrid-root": {
-                    border: "none",
-                  },
-                  "& .MuiDataGrid-cell": {
-                    borderBottom: "none",
-                  },
-                  "& .name-column--cell": {
-                    color: colors.greenAccent[300],
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor: colors.blueAccent[700],
-                    borderBottom: "none",
-                  },
-                  "& .MuiDataGrid-virtualScroller": {
-                    backgroundColor: colors.primary[400],
-                  },
-                  "& .MuiDataGrid-footerContainer": {
-                    borderTop: "none",
-                    backgroundColor: colors.blueAccent[700],
-                  },
-                  "& .MuiCheckbox-root": {
-                    color: `${colors.greenAccent[200]} !important`,
-                  },
-                }}
-              >
-                <DataGrid rows={mockDataTeam} columns={columns} />
-              </Box>{" "}
-            </div>
-          </div>
+        <div className="info-container">
+          <div className="title-text">Created day: </div>
+          <div className="content-text">{news?.created_at}</div>
         </div>
       </div>
-    </div>
+
+      <div className="left">
+        <LazyLoadImage
+          key={news.id}
+          src={news.imageUrl}
+          alt={`Blog ${news.id}`}
+          effect="blur"
+          width={1800}
+          height={700}
+          className="scaled-img"
+        />
+      </div>
+      <div className="right">
+        <div className="buttons">
+          <button className="button">
+            <BsPencilSquare />
+          </button>
+          <button className="button">
+            <AiOutlineDelete />
+          </button>
+        </div>
+        <h1>{news.title}</h1>
+        <p>{news.text}</p>
+      </div>
+
+      <h1>Comment</h1>
+
+      <div className="Comment">
+        <div className="Comment__contain">
+          {comments.map((comment) => (
+            <Comments
+              username={comment?.account_id}
+              comment={comment?.text}
+            ></Comments>
+          ))}
+        </div>
+      </div>
+    </Box>
   );
 };
 
