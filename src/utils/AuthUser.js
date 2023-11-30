@@ -109,6 +109,11 @@ export default function AuthUser() {
         http.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     }
 
+    const updateProfile = (username) => {
+        setUsername(username);
+        localStorage.setItem('username', JSON.stringify(username));
+    }
+
     return {
         http,
         accessToken,
@@ -122,6 +127,8 @@ export default function AuthUser() {
         hasUsername,
         setAuthorizationHeader,
         saveToken,
+        setUsername,
+        updateProfile,
         logout,
     }
 }

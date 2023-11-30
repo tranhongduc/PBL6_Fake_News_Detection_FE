@@ -30,7 +30,6 @@ const DetailsPages = () => {
   const [isModalDeleteBlogOpen, setIsModalDeleteBlogOpen] = useState(false)
   const [isOnModeEditBlog, setIsOnModeEditBlog] = useState(false)
   const [listCategories, setListCategories] = useState([])
-  const [blogContent, setBlogContent] = useState('')
 
   const navigate = useNavigate()
 
@@ -69,16 +68,35 @@ const DetailsPages = () => {
   }
 
   const handleDeleteBlog = () => {
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken);
+    }
+    
+    http.delete(`admin/news/delete/${id}/`)
+      .then(() => {
+        Swal.fire(
+          'Delete Blog',
+          'You\'ve deleted your blog successful',
+          'success'
+        ).then(() => {
+          navigate('/manage-account');
+        })
+      })
+      .catch((reject) => {
+        console.log(reject);
+        Swal.fire(
+          'Error',
+          'Oops. Try again',
+          'error'
+        ).then(() => {
+          // navigate(0);
+        })
+      })
   }
 
   // ---------------------------  Handle Update Blog Event  ---------------------------
   const handleEditBlog = () => {
     setIsOnModeEditBlog(!isOnModeEditBlog)
-    console.log('HELLO')
-  }
-
-  const handleChangeBlog = (e) => {
-    setBlogContent(e)
   }
 
   // ---------------------------  Handle Update Blog Form  ---------------------------
@@ -88,10 +106,6 @@ const DetailsPages = () => {
   const onEditBlogSuccessed = (values) => {
     const { title, category, text } = values
     const formData = new FormData();
-
-    console.log('Title', title)
-    console.log('Category', category)
-    console.log('Text', text)
 
     formData.append('title', title)
     formData.append('category', category)
@@ -283,7 +297,6 @@ const DetailsPages = () => {
                 >
                   <TextEditor
                     value={newsDetail.text}
-                    onChange={handleChangeBlog}
                   />
                 </Form.Item>
                 <Form.Item

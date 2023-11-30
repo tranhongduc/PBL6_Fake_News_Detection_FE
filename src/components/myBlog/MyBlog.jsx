@@ -17,10 +17,6 @@ const cx = classNames.bind(styles)
 const MyBlog = () => {
   const { http, userId } = AuthUser();
 
-  const handleClickSearch = () => {
-    
-  }
-
   // Fetch image state
   const [imageUrl, setImageUrl] = useState({});
 
@@ -59,6 +55,48 @@ const MyBlog = () => {
     console.log(currentPage, pageSize);
     setCurrentPage(currentPage);
     setPageSize(pageSize);
+  }
+
+  // --------------------------     Handle Search     --------------------------
+
+  const [input, setInput] = useState('')
+
+  const onChange = (e) => {
+    setInput(e)
+  }
+
+  const handleClickSearch = () => {
+    const fetchData = () => {
+      const formData = new FormData();
+      
+      formData.append('search', input)
+
+      http.get(`user/search/${pageSize}/${currentPage}`)
+        .then((resolve) => {
+          console.log('List news:', resolve.data)
+          const listNews = resolve.data.news
+
+          const newListNews = listNews.map((news) => ({
+            ...news,
+            imageUrl: '',
+          }));
+          console.log('New list news:', newListNews)
+          setListNews(newListNews);
+
+          setTotalNews(resolve.data.news_count)
+
+          // Lấy URL cho từng tin tức
+          newListNews.forEach((news) => {
+            getFirebaseImageURL(news.image, news.id);
+          });
+        })
+        .catch((reject) => {
+          console.log('Error:', reject);
+        });
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }
 
   // --------------------------     Fetch API     --------------------------
@@ -103,7 +141,7 @@ const MyBlog = () => {
   return (
     <div className={cx("my-blog-container")}>
       <div className={cx("search-bar-container")}>
-        <SearchBar />
+        <SearchBar input={input} handleChangeInput={onChange}  />
         <button
           className={cx("btn-search-wrapper")}
           onClick={handleClickSearch}
