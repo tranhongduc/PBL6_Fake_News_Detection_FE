@@ -15,7 +15,7 @@ import { FaSearch } from 'react-icons/fa'
 const cx = classNames.bind(styles)
 
 const MyBlog = () => {
-  const { http } = AuthUser();
+  const { http, userId } = AuthUser();
 
   const handleClickSearch = () => {
     
@@ -64,7 +64,7 @@ const MyBlog = () => {
   // --------------------------     Fetch API     --------------------------
   useEffect(() => {
     const fetchData = () => {
-      http.get(`user/list_news_user/${pageSize}/${currentPage}`)
+      http.get(`user/news_list_by_author_user_real/${userId}/${pageSize}/${currentPage}`)
         .then((resolve) => {
           console.log('List news:', resolve.data)
           const listNews = resolve.data.news

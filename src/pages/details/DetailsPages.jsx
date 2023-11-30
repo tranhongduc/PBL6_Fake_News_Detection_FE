@@ -89,6 +89,8 @@ const DetailsPages = () => {
     const { title, category, text } = values
     const formData = new FormData();
 
+    console.log('Title', title)
+    console.log('Category', category)
     console.log('Text', text)
 
     formData.append('title', title)
@@ -103,7 +105,7 @@ const DetailsPages = () => {
       .then(() => {
         Swal.fire(
           'Ta~Da~',
-          'You\'ve update your blog successfully',
+          'You\'ve updated your blog successfully',
           'success'
         ).then(() => {
           navigate(0);
@@ -225,7 +227,7 @@ const DetailsPages = () => {
                 onFinishFailed={onEditBlogFailed}
                 initialValues={{
                   'title': newsDetail.title,
-                  'category': newsDetail.category,
+                  'category': newsDetail.category_id,
                   'text': newsDetail.text
                 }}
               >

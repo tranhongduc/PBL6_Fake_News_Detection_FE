@@ -67,7 +67,10 @@ const Header = () => {
       })
     }
 
-    fetchAvatar();
+    if (accessToken != null) {
+      fetchAvatar();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
