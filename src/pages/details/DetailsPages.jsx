@@ -11,11 +11,13 @@ import { storage } from '../../utils/firebase'
 import { ref, getDownloadURL } from "firebase/storage"
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import TextEditor from "../../components/textEditor/TextEditor";
-import { Form, Input, Select, Button, Modal } from 'antd';
+import { Form, Input, Select, Button, Modal, Pagination, Divider } from 'antd';
 import Swal from "sweetalert2";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { RiErrorWarningFill } from "react-icons/ri";
+import Comment from "../../components/comment/Comment";
+import Footer from "../../components/footer/Footer";
 
 const cx = classNames.bind(styles);
 
@@ -42,17 +44,40 @@ const DetailsPages = () => {
     },
   };
 
-  const getFirebaseImageURL = async (imagePath, newsId) => {
+  const getFirebaseImageURL = async (imagePath) => {
     const imageRef = ref(storage, imagePath);
 
     try {
       const url = await getDownloadURL(imageRef);
+      console.log('Url:', url)
       return url;
     } catch (error) {
       console.error('Error getting image URL', error);
       return null;
     }
   };
+
+  // Pagination state
+  const pageSizeOptions = [6, 9, 12];
+  const DEFAULT_CURRENT_PAGE_NUMBER = 1;
+  const DEFAULT_PAGE_SIZE_NUMBER = 9;
+  const [listComments, setListComments] = useState([]); // Fetch list comments state
+  const [currentPage, setCurrentPage] = useState(DEFAULT_CURRENT_PAGE_NUMBER);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE_NUMBER);
+  const [totalComments, setTotalComments] = useState(0);
+
+  // --------------------------     Paginate     --------------------------
+
+  const handleClickPaginate = (page, pageSize) => {
+    console.log(page, pageSize);
+    setCurrentPage(page);
+  }
+
+  const handleShowSizeChange = (currentPage, pageSize) => {
+    console.log(currentPage, pageSize);
+    setCurrentPage(currentPage);
+    setPageSize(pageSize);
+  }
 
   // ---------------------------  Handle Delete Blog Event  ---------------------------
   const handleOk = () => {
@@ -71,7 +96,7 @@ const DetailsPages = () => {
     if (accessToken != null) {
       setAuthorizationHeader(accessToken);
     }
-    
+
     http.delete(`admin/news/delete/${id}/`)
       .then(() => {
         Swal.fire(
@@ -157,26 +182,6 @@ const DetailsPages = () => {
 
   // --------------------------     Fetch API     --------------------------
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await http.get(`/admin/detail-news/${id}`);
-        const newsDetail = response.data;
-
-        // Update image URL
-        const imageUrl = await getFirebaseImageURL(newsDetail.image);
-        newsDetail.imageUrl = imageUrl;
-
-        setNewsDetail(newsDetail);
-      } catch (error) {
-        console.log('Error:', error)
-      }
-    }
-
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
-
-  useEffect(() => {
     const fetchData = () => {
       http.get('admin/categories_list')
         .then((resolve) => {
@@ -191,6 +196,46 @@ const DetailsPages = () => {
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await http.get(`/admin/detail-news/${id}`);
+        const newsDetail = response.data;
+
+        // Update image URL
+        const imageUrl = await getFirebaseImageURL(newsDetail.image);
+        newsDetail.imageUrl = imageUrl;
+
+        setNewsDetail(newsDetail);
+        setTotalComments(newsDetail.comments_count)
+      } catch (error) {
+        console.log('Error:', error)
+      }
+    }
+
+    fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  useEffect(() => {
+    const fetchData = () => {
+      http.get(`admin/comments_list_by_news/${id}/${currentPage}`)
+        .then((resolve) => {
+          console.log('List Comments:', resolve.data)
+          const listComments = resolve.data.comments
+          setListComments(listComments);
+        })
+        .catch((reject) => {
+          console.log('Error:', reject);
+        });
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, pageSize]);
+
+  // --------------------------     Fetch API     --------------------------
 
   return (
     <div className={cx("details-container")}>
@@ -318,6 +363,59 @@ const DetailsPages = () => {
             <>
               <h1 className={cx("details-blog__title")}>{newsDetail.title}</h1>
               <p className={cx("details-blog__content")} dangerouslySetInnerHTML={{ __html: newsDetail.text }}></p>
+
+              <div className={cx("review-wrapper")}>
+                <div className={cx("review-wrapper__left")}>
+                  <h2>Comments</h2>
+                </div>
+                <div className={cx("review-wrapper__right")}>
+                  <button>
+                    Create comment
+                  </button>
+                </div>
+              </div>
+              <div className={cx("comment")}>
+                {listComments.map((comment, index) => {
+                  if (index === listComments.length - 1) {
+                    return (
+                      <Comment
+                        avatar={comment.avatar}
+                        comment={comment.text}
+                        username={comment.author}
+                        email={comment.email}
+                      />
+                    )
+                  } else {
+                    return (
+                      <>
+                        <Comment
+                          key={comment.id}
+                          avatar={comment.avatar}
+                          comment={comment.text}
+                          username={comment.author}
+                          email={comment.email}
+                        />
+                        <Divider className={cx("seperate-line")} />
+                      </>
+                    )
+                  }
+                })}
+                <div className={cx("pagination")}>
+                  <Pagination
+                    current={currentPage}
+                    defaultCurrent={DEFAULT_CURRENT_PAGE_NUMBER}
+                    defaultPageSize={DEFAULT_PAGE_SIZE_NUMBER}
+                    hideOnSinglePage
+                    total={totalComments}
+                    pageSizeOptions={pageSizeOptions}
+                    showTotal={(totalComments) => totalComments <= 1 ? `Total ${totalComments} comment` : `Total ${totalComments} comments`}
+                    showQuickJumper
+                    showSizeChanger
+                    onChange={handleClickPaginate}
+                    onShowSizeChange={handleShowSizeChange}
+                  />
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -329,18 +427,18 @@ const DetailsPages = () => {
         onCancel={handleCancel}
         footer={[
           <>
-            <Button 
-              type="primary" 
-              className={cx("btn-confirm-delete")} 
-              key="delete" 
+            <Button
+              type="primary"
+              className={cx("btn-confirm-delete")}
+              key="delete"
               onClick={handleDeleteBlog}
             >
               OK
             </Button>
-            <Button 
-              type="primary" 
-              className={cx("btn-cancel-delete")} 
-              key="back" 
+            <Button
+              type="primary"
+              className={cx("btn-cancel-delete")}
+              key="back"
               onClick={handleCancel}
             >
               Huỷ
@@ -349,10 +447,11 @@ const DetailsPages = () => {
         ]}
       >
         <div className={cx("modal-wrapper")}>
-          <RiErrorWarningFill size={30} style={{color: '#ED5253'}} />
-          <h2 style={{textAlign: 'center'}}>Xác nhận xoá bài viết này?</h2>
+          <RiErrorWarningFill size={30} style={{ color: '#ED5253' }} />
+          <h2 style={{ textAlign: 'center' }}>Xác nhận xoá bài viết này?</h2>
         </div>
       </Modal>
+      <Footer />
     </div>
   )
 }
