@@ -36,7 +36,7 @@ const Comment = ({ avatar, comment, username, email }) => {
 
   // ---------------------------      Modal Draggable      ---------------------------
   const draggleRef = useRef(null);
-  const [disabled, ] = useState(false);
+  const [disabled,] = useState(false);
   const [bounds, setBounds] = useState({
     left: 0,
     top: 0,
@@ -84,10 +84,10 @@ const Comment = ({ avatar, comment, username, email }) => {
       </div>
       <div className={cx("comment-wrapper__middle")}>
         <div className={cx("comment-username")}>
-            <p onClick={handleClickUsername}>{username}</p>
+          <p onClick={handleClickUsername}>{username}</p>
         </div>
         <div className={cx("comment-detail")}>
-          <p>{comment}</p>
+          <p dangerouslySetInnerHTML={{ __html: comment }}></p>
         </div>
       </div>
       <button className={cx("comment-wrapper__right")}>
@@ -97,8 +97,8 @@ const Comment = ({ avatar, comment, username, email }) => {
       </button>
       <Modal
         title={
-          <UserProfileModal 
-            avatar={avatarUrl} 
+          <UserProfileModal
+            avatar={avatarUrl}
             username={username}
             email={email}
           />

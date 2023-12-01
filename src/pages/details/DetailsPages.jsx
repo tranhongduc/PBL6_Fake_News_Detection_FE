@@ -31,6 +31,7 @@ const DetailsPages = () => {
   const [newsDetail, setNewsDetail] = useState({})
   const [isModalDeleteBlogOpen, setIsModalDeleteBlogOpen] = useState(false)
   const [isOnModeEditBlog, setIsOnModeEditBlog] = useState(false)
+  const [isModalCreateCommentOpen, setIsModalCreateCommentOpen] = useState(false)
   const [listCategories, setListCategories] = useState([])
 
   const navigate = useNavigate()
@@ -178,6 +179,11 @@ const DetailsPages = () => {
       progress: undefined,
       theme: "colored",
     })
+  }
+
+  // --------------------------     Handle Comment     --------------------------
+  const handleOpenModalCreateComment = () => {
+    setIsModalCreateCommentOpen(!isModalCreateCommentOpen)
   }
 
   // --------------------------     Fetch API     --------------------------
@@ -369,7 +375,7 @@ const DetailsPages = () => {
                   <h2>Comments</h2>
                 </div>
                 <div className={cx("review-wrapper__right")}>
-                  <button>
+                  <button onClick={handleOpenModalCreateComment}>
                     Create comment
                   </button>
                 </div>
@@ -449,6 +455,36 @@ const DetailsPages = () => {
         <div className={cx("modal-wrapper")}>
           <RiErrorWarningFill size={30} style={{ color: '#ED5253' }} />
           <h2 style={{ textAlign: 'center' }}>Xác nhận xoá bài viết này?</h2>
+        </div>
+      </Modal>
+      <Modal
+        title="Tạo Comment"
+        open={isModalCreateCommentOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={[
+          <>
+            <Button
+              type="primary"
+              className={cx("btn-confirm-delete")}
+              key="delete"
+              onClick={handleDeleteBlog}
+            >
+              OK
+            </Button>
+            <Button
+              type="primary"
+              className={cx("btn-cancel-delete")}
+              key="back"
+              onClick={handleCancel}
+            >
+              Huỷ
+            </Button>
+          </>
+        ]}
+      >
+        <div className={cx("modal-wrapper")}>
+          <TextEditor />
         </div>
       </Modal>
       <Footer />

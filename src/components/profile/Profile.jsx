@@ -155,9 +155,11 @@ const Profile = ({ userInfo }) => {
       })
       .catch((reject) => {
         console.log(reject);
-        const { new_password, confirm_new_password } = reject.response.data;
+        const { error, new_password, confirm_new_password } = reject.response.data;
         
-        if (new_password != null) {
+        if (error != null) {
+          var errorMsg = error
+        } else if (new_password != null) {
           var errorMsg = new_password[0];
         } else if (confirm_new_password != null) { 
           var errorMsg = confirm_new_password[0];

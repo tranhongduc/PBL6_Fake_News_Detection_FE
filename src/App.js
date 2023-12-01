@@ -15,6 +15,7 @@ const DetailsPages = lazy(() => import("./pages/details/DetailsPages"));
 const Account = lazy(() => import("./pages/account/Account"));
 const Create = lazy(() => import("./components/create/Create"));
 const Login = lazy(() => import("./pages/login/Login"));
+const ForgotPassword = lazy(() => import("./pages/forgotPassword/ForgotPassword"))
 const DashBoard = lazy(() => import("./pages/admin/scenes/Dashboard/Dashboard"));
 const Team = lazy(() => import("./pages/admin/u/team"));
 const Contacts = lazy(() => import("./pages/admin/u/contacts"));
@@ -84,6 +85,14 @@ const App = () => {
             element={
               <Suspense fallback={<Loading />}>
                 <Login />
+              </Suspense>
+            }
+          />
+          <Route
+            path='/forgot-password'
+            element={
+              <Suspense fallback={<Loading />}>
+                <ForgotPassword />
               </Suspense>
             }
           />
