@@ -102,7 +102,7 @@ const MyBlog = () => {
   // --------------------------     Fetch API     --------------------------
   useEffect(() => {
     const fetchData = () => {
-      http.get(`user/news_list_by_author_user_real/${userId}/${pageSize}/${currentPage}`)
+      http.get(`user/list_new_real_by_author/${userId}/${pageSize}/${currentPage}`)
         .then((resolve) => {
           console.log('List news:', resolve.data)
           const listNews = resolve.data.news
@@ -183,7 +183,7 @@ const MyBlog = () => {
               >
                 <h3>{news.title}</h3>
               </Link>
-              <p>{news.text.slice(0, 180)}...</p>
+              <p dangerouslySetInnerHTML={{ __html: news.text.slice(0, 150) }}></p>
               <div className={cx("date")}>
                 <AiOutlineClockCircle className={cx("icon")} /> <label htmlFor='date'>{format(new Date(news.created_at), 'dd/MM/yyyy')}</label>
                 <AiOutlineComment className={cx("icon")} /> <label htmlFor='comment'>{news.comments_count}</label>

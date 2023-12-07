@@ -144,6 +144,14 @@
     gap: 16px;
 }
 
+.modal-wrapper-delete {
+    display: flex;
+    margin: 3% 4%;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
 .btn-confirm-delete {
     background-color: #ED5253;
     transition: 0.3s;
@@ -229,3 +237,29 @@
     color: red;
     font-size: 14px;
 }
+
+.btn-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.btn-upload-image {
+    margin: 8px 0;
+    background-color: #10ac84;
+    border: 1px solid;
+    border-color: #10ac84 1px solid;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 12px 20px;
+    font-size: 16px;
+  
+    &:hover {
+      cursor: pointer;
+      opacity: 0.8;
+      background-color: #10ac84 !important;
+    }
+  }

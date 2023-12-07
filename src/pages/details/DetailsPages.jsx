@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import styles from './DetailsPages.module.scss'
 import classNames from "classnames/bind";
 import { BsPencilSquare } from "react-icons/bs"
@@ -8,7 +8,7 @@ import { useEffect } from "react"
 import Header from "../../components/header/Header";
 import AuthUser from "../../utils/AuthUser";
 import { storage } from '../../utils/firebase'
-import { ref, getDownloadURL } from "firebase/storage"
+import { ref, getDownloadURL, uploadBytes } from "firebase/storage"
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import TextEditor from "../../components/textEditor/TextEditor";
 import { Form, Input, Select, Button, Modal, Pagination, Divider } from 'antd';
@@ -18,6 +18,7 @@ import { toast } from 'react-toastify';
 import { RiErrorWarningFill } from "react-icons/ri";
 import Comment from "../../components/comment/Comment";
 import Footer from "../../components/footer/Footer";
+import { v4 } from "uuid";
 import { format } from "date-fns";
 
 const cx = classNames.bind(styles);
@@ -36,6 +37,8 @@ const DetailsPages = () => {
   const [listCategories, setListCategories] = useState([])
   const [comment, setComment] = useState('')
   const [contentError, setContentError] = useState(false);
+  const [image, setImage] = useState("");
+  const inputRef = useRef(null);
 
   const navigate = useNavigate()
 
@@ -123,6 +126,18 @@ const DetailsPages = () => {
     setPageSize(pageSize);
   }
 
+  // ---------------------------  Handle Upload Image ---------------------------
+
+  const handleClickUploadImage = () => {
+    inputRef.current.click()
+  }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    console.log(file)
+    setImage(file)
+  }
+
   // ---------------------------  Handle Delete Blog Event  ---------------------------
   const handleCloseModalDeleteBlog = () => {
     setIsModalDeleteBlogOpen(false)
@@ -169,40 +184,131 @@ const DetailsPages = () => {
 
   // Successful case
   const onEditBlogSuccessed = (values) => {
-    const { title, category, text } = values
-    const formData = new FormData();
+    // Gửi đường dẫn ảnh đến Django để lưu vào database
+    // (Sử dụng API hoặc các phương thức khác để thực hiện tác vụ này)
+    const selectedCategory = listCategories.find((category) => category.id === values.category)
+    const categoryName = selectedCategory.name
 
-    formData.append('title', title)
-    formData.append('category', category)
-    formData.append('text', text)
+    if (image !== "") {
+      const newsRef = ref(storage, `news/${categoryName}/${image.name + v4()}/`);
+      uploadBytes(newsRef, image).then(() => {
+        getDownloadURL(newsRef).then((url) => {
+          // Upload ảnh lên Firebase Storage
+          const formData = new FormData();
+          
+          const { title, category, text } = values
+  
+          formData.append('title', title)
+          formData.append('category', category)
+          formData.append('text', text)
+          formData.append('image', url);
+  
+          if (accessToken != null) {
+            setAuthorizationHeader(accessToken);
+          }
+  
+          http.put(`user/news/update/${id}/`, formData)
+            .then(() => {
+              Swal.fire(
+                'Great!',
+                'You\'ve updated your blog successfully',
+                'success'
+              ).then(() => {
+                navigate(0);
+              })
+            })
+            .catch((reject) => {
+              console.log(reject);
+  
+              const { text } = reject.response.data
+              if (text !== undefined) {
+                toast.error(text[0], {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "colored",
+                })
+              } else {
+                toast.error('Oops. Try again', {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "colored",
+                })
+              }
+            })
+        }).catch((error) => {
+          console.log('Error:', error)
+          Swal.fire(
+            'Oops',
+            'Try again',
+            'error'
+          )
+        })
+      })
+    } else {
+      const { title, category, text } = values
 
-    if (accessToken != null) {
-      setAuthorizationHeader(accessToken);
-    }
-
-    http.put(`user/news/update/${id}/`, formData)
-      .then(() => {
+      if (title === newsDetail.title && category === newsDetail.category_id && text === newsDetail.text) {
         Swal.fire(
-          'Ta~Da~',
-          'You\'ve updated your blog successfully',
-          'success'
-        ).then(() => {
-          navigate(0);
-        })
-      })
-      .catch((reject) => {
-        console.log(reject);
-        toast.error('Oops. Try again', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        })
-      })
+          'Not updated yet',
+          'You haven\'t changed anything',
+          'error'
+        )
+      } else {
+        const formData = new FormData();
+  
+        formData.append('title', title)
+        formData.append('category', category)
+        formData.append('text', text)
+    
+        if (accessToken != null) {
+          setAuthorizationHeader(accessToken);
+        }
+    
+        http.put(`user/news/update/${id}/`, formData)
+          .then(() => {
+            Swal.fire(
+              'Great',
+              'You\'ve updated your blog successfully',
+              'success'
+            ).then(() => {
+              navigate(0);
+            })
+          })
+          .catch((reject) => {
+            console.log(reject);
+
+            const { text } = reject.response.data
+            if (text !== undefined) {
+              toast.error(text[0], {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+              })
+            } else {
+              Swal.fire(
+                'Oops',
+                'Try again',
+                'error'
+              )
+            }
+          })
+      }
+    }
   }
 
   // Failed case
@@ -242,12 +348,12 @@ const DetailsPages = () => {
         cancelButtonText: 'Close',
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/login', { 
-            state: { 
+          navigate('/login', {
+            state: {
               from: currentPath,
-            } 
+            }
           });
-        } 
+        }
       })
     }
   }
@@ -266,12 +372,11 @@ const DetailsPages = () => {
       const formData = new FormData();
       formData.append('text', comment);
       formData.append('news', id);
-  
+
       if (accessToken != null) {
         setAuthorizationHeader(accessToken);
-  
       }
-  
+
       http.post(`user/comment/store/`, formData)
         .then(() => {
           Swal.fire(
@@ -314,7 +419,7 @@ const DetailsPages = () => {
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -358,16 +463,29 @@ const DetailsPages = () => {
     <div className={cx("details-container")}>
       <Header />
       <div className={cx("details-blog")}>
+        <input
+          type="file"
+          ref={inputRef}
+          style={{ display: 'none' }}
+          onChange={handleImageChange}
+        />
         <div className={cx("details-blog__top")}>
-          <LazyLoadImage
-            key={newsDetail.id}
-            src={newsDetail.imageUrl}
-            alt={`Blog ${newsDetail.id}`}
-            effect="blur"
-            width={'100%'}
-            height={700}
-            className={cx("scaled-img")}
-          />
+          {image ? (
+            <>
+              <p>{image.name}</p>
+              <img style={{objectFit: 'cover'}} src={URL.createObjectURL(image)} alt='blogImage' className={cx("scaled-img")} />
+            </>
+          ) : (
+            <LazyLoadImage
+              key={newsDetail.id}
+              src={newsDetail.imageUrl}
+              alt={`Blog ${newsDetail.id}`}
+              effect="blur"
+              width={'100%'}
+              height={700}
+              className={cx("scaled-img")}
+            />
+          )}
         </div>
         <div className={cx("details-blog__bottom")}>
           {isEditAllowed ? (
@@ -390,6 +508,11 @@ const DetailsPages = () => {
           )}
           {isOnModeEditBlog ? (
             <div className={cx("form-container")}>
+              <div className={cx("btn-image-container")}>
+                <button onClick={handleClickUploadImage} className={cx("btn-upload-image")}>
+                  Upload Image
+                </button>
+              </div>
               <Form
                 {...createPostFormLayout}
                 form={form}
@@ -460,7 +583,7 @@ const DetailsPages = () => {
                   <TextEditor
                     modules={updateNewsModule}
                     value={newsDetail.text}
-                    placeholder={"Your Blog's Content"} 
+                    placeholder={"Your Blog's Content"}
                   />
                 </Form.Item>
                 <Form.Item
@@ -583,7 +706,7 @@ const DetailsPages = () => {
           </>
         ]}
       >
-        <div className={cx("modal-wrapper")}>
+        <div className={cx("modal-wrapper-delete")}>
           <RiErrorWarningFill size={30} style={{ color: '#ED5253' }} />
           <h2 style={{ textAlign: 'center' }}>Confirm delete this blog?</h2>
         </div>
@@ -615,11 +738,11 @@ const DetailsPages = () => {
         ]}
       >
         <div className={cx("modal-wrapper")}>
-          <TextEditor 
-            modules={createCommentModule} 
-            value={comment} 
-            placeholder={"Write your comment"} 
-            onChange={onChangeComment} 
+          <TextEditor
+            modules={createCommentModule}
+            value={comment}
+            placeholder={"Write your comment"}
+            onChange={onChangeComment}
           />
           {contentError && (
             <div className={cx("error-message")}>
