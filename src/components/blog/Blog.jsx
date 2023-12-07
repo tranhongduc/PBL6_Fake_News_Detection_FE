@@ -69,7 +69,7 @@ const Blog = () => {
   }
 
   const handleClickSearch = () => {
-    if (input.length != 0 && input.trim() != "") {
+    if ((input.length != 0 && input.trim() != "") || category != "") {
       setIsOnSearchMode(true)
     } else {
       setIsOnSearchMode(false)
@@ -153,7 +153,7 @@ const Blog = () => {
   useEffect(() => {
     const fetchData = () => {
       if (isOnSearchMode) {
-        http.get(`user/search/${pageSize}/${currentPage}/?search=${input}`)
+        http.get(`user/search/${pageSize}/${currentPage}/?search=${input}&category=${category}`)
           .then((resolve) => {
             console.log('List news:', resolve.data)
             const listNews = resolve.data.news
