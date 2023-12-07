@@ -18,7 +18,7 @@
                 width: 100px;
                 height: 100px;
                 border-radius: 50%;
-                border: 2px solid #8dd3bb;
+                border: 2px solid #FF8682;
                 object-fit: cover;
             }
         }
@@ -29,6 +29,7 @@
         flex-direction: column;
         justify-content: flex-start;
         align-self: flex-start;
+        width: 90%;
         margin-inline: 2%;
     }
 
@@ -39,14 +40,14 @@
         border: none;
         background-color: transparent;
         
-        .report {
+        .edit, .report {
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 5px;
             width: 30px;
             height: 30px;
-            background: #8dd3bb;
+            background: #FF8682;
             transition: 0.3s;
 
             &:hover {
@@ -57,7 +58,23 @@
     }
 }
 
+.btn-cancel-delete {
+    background-color: #888686;
+    transition: 0.3s;
+
+    &:hover {
+        cursor: pointer;
+        background-color: #888686 !important;
+        opacity: 0.8;
+    }
+}
+
 .comment-username {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    align-items: center;
+
     > p {
         font-size: 20px;
         margin-block: 8px;
@@ -66,7 +83,7 @@
         &:hover {
             font-size: 20px;
             cursor: pointer;
-            color: #8dd3bb;
+            color: #FF8682;
             font-weight: 500;
         }
     }
@@ -78,8 +95,21 @@
 
     > p {
         display: flex;
-        justify-content: center;
-        text-align: justify;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+}
+
+.comment-published-date {
+    font-weight: 400;
+    font-size: 18px;
+
+    > p {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 4px 0;
     }
 }
 
@@ -87,3 +117,8 @@
     border: 1px solid #bfc4c1;
 }
 
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 6px;
+}

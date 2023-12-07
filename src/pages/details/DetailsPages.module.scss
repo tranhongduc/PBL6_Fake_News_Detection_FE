@@ -7,13 +7,7 @@
     &__top {
         overflow: hidden;
         width: 100%;
-        height: 750px;
-        /* Đặt chiều cao mong muốn */
-    }
-
-    &__title {
-        font-size: 30px;
-        font-weight: 500;
+        height: 730px;
     }
 
     &__content {
@@ -24,6 +18,39 @@
 
         img {
             width: 100%;
+        }
+    }
+}
+
+.details-blog-header {
+
+    &__top {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 30px;
+        font-weight: 500;
+        margin: 8px 0;
+    }
+
+    &__bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        > p {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .published_date {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .author {
+            font-size: 24px;
+            font-weight: 600;
         }
     }
 }
@@ -110,9 +137,10 @@
 
 .modal-wrapper {
     display: flex;
+    flex-direction: column;
     margin: 3% 4%;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     gap: 16px;
 }
 
@@ -148,7 +176,10 @@
     justify-content: space-between;
 
     &__left {
-
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
         > h2 {
             font-size: 32px;
         }
@@ -160,7 +191,7 @@
         align-items: center;
 
         > button {
-            background-color: #8dd3bb;
+            background-color: #FF8682;
             border-radius: 5px;
             border: none;
             transition: 0.3s;
@@ -171,7 +202,7 @@
 
             &:hover {
                 cursor: pointer;
-                background-color: #8dd3bb;
+                background-color: #FF8682;
                 opacity: 0.8;
             }
         }
@@ -192,4 +223,9 @@
     justify-content: center;
     align-items: center;
     margin-block: 24px;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
 }
