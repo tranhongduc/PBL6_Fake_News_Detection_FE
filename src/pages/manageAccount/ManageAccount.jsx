@@ -14,7 +14,7 @@ import { v4 } from "uuid";
 import { storage } from '../../utils/firebase'
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { addAvatar } from '../../redux/actions';
-import { DatePicker, Divider, Form, Steps, Input, Modal, Select, Button } from 'antd';
+import { Form, Steps } from 'antd';
 import Profile from "../../components/profile/Profile"
 import MyBlog from "../../components/myBlog/MyBlog"
 import SavedBlog from "../../components/savedBlog/SavedBlog"
