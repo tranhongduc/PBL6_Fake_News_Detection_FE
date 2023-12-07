@@ -5,21 +5,25 @@ import { AiOutlineTags, AiOutlineComment, AiOutlineShareAlt, AiOutlineClockCircl
 import { Link } from "react-router-dom"
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import AuthUser from "../../utils/AuthUser";
-import { Button, Pagination } from "antd";
+import { Button, Pagination, Select } from "antd";
 import { storage } from '../../utils/firebase'
 import { ref, getDownloadURL } from "firebase/storage"
 import { format } from 'date-fns';
 import SearchBar from '../searchBar/SearchBar'
 import { FaSearch } from 'react-icons/fa'
+import { toast } from 'react-toastify'
 
 const cx = classNames.bind(styles)
 
 const MyBlog = () => {
-  const { http, userId } = AuthUser();
+  const { http, accessToken, userId, setAuthorizationHeader } = AuthUser();
 
   // Fetch image state
   const [imageUrl, setImageUrl] = useState({});
-
+  const [listCategories, setListCategories] = useState([])
+  const [category, setCategory] = useState('')
+  const [isOnSearchMode, setIsOnSearchMode] = useState(false)
+  
   const getFirebaseImageURL = async (imagePath, newsId) => {
     const imageRef = ref(storage, imagePath);
     try {
@@ -65,13 +69,19 @@ const MyBlog = () => {
     setInput(e)
   }
 
-  const handleClickSearch = () => {
-    const fetchData = () => {
-      const formData = new FormData();
-      
-      formData.append('search', input)
+  const onChangeCategory = (value) => {
+    setCategory(value)
+  }
 
-      http.get(`user/search/${pageSize}/${currentPage}`)
+  const handleClickSearch = () => {
+    if ((input.length != 0 && input.trim() != "") || category != "") {
+      setIsOnSearchMode(true)
+    } else {
+      setIsOnSearchMode(false)
+    }
+
+    const fetchData = () => {
+      http.get(`user/search_real_in_user/${userId}/${pageSize}/${currentPage}?search=${input}&category=${category}`)
         .then((resolve) => {
           console.log('List news:', resolve.data)
           const listNews = resolve.data.news
@@ -89,9 +99,30 @@ const MyBlog = () => {
           newListNews.forEach((news) => {
             getFirebaseImageURL(news.image, news.id);
           });
+
+          toast.success(`Search news successfull`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
         })
         .catch((reject) => {
           console.log('Error:', reject);
+          toast.error('Oops. Try again', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
         });
     };
 
@@ -101,8 +132,52 @@ const MyBlog = () => {
 
   // --------------------------     Fetch API     --------------------------
   useEffect(() => {
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken);
+    }
+
     const fetchData = () => {
-      http.get(`user/list_new_real_by_author/${userId}/${pageSize}/${currentPage}`)
+      http.get('admin/categories_list')
+        .then((resolve) => {
+          console.log('Response Data:', resolve.data)
+          setListCategories(resolve.data.categories)
+        })
+        .catch((reject) => {
+          console.log('Error:', reject)
+        })
+    }
+
+    fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const fetchData = () => {
+      if (isOnSearchMode) {
+        http.get(`user/search_real_in_user/${userId}/${pageSize}/${currentPage}/?search=${input}&category=${category}`)
+          .then((resolve) => {
+            console.log('List news:', resolve.data)
+            const listNews = resolve.data.news
+
+            const newListNews = listNews.map((news) => ({
+              ...news,
+              imageUrl: '',
+            }));
+            console.log('New list news:', newListNews)
+            setListNews(newListNews);
+
+            setTotalNews(resolve.data.news_count)
+
+            // Lấy URL cho từng tin tức
+            newListNews.forEach((news) => {
+              getFirebaseImageURL(news.image, news.id);
+            });
+          })
+          .catch((reject) => {
+            console.log('Error:', reject);
+          });
+      } else {
+        http.get(`user/list_new_real_by_author/${userId}/${pageSize}/${currentPage}`)
         .then((resolve) => {
           console.log('List news:', resolve.data)
           const listNews = resolve.data.news
@@ -124,6 +199,7 @@ const MyBlog = () => {
         .catch((reject) => {
           console.log('Error:', reject);
         });
+      }
     };
 
     fetchData();
@@ -148,6 +224,21 @@ const MyBlog = () => {
         >
           <FaSearch />
         </button>
+        <Select className={cx("categories-options")} onChange={onChangeCategory} placeholder="Select category">
+          <Select.Option value={''}>All</Select.Option>
+          {
+            listCategories.map((category) => {
+              return (
+                <Select.Option
+                  key={category.id}
+                  value={category.id}
+                >
+                  {category.name}
+                </Select.Option>
+              )
+            })
+          }
+        </Select>
       </div>
       <div className={cx("my-blog-container__top")}>
       {listNews.map((news) => (
