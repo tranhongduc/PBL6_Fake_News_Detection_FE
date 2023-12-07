@@ -10,13 +10,15 @@ import carousel2 from "../../assets/images/carousel2.png";
 import carousel3 from "../../assets/images/carousel3.png";
 import { Form, Button, Checkbox, Input, Divider, Modal } from "antd";
 import ImageSlider from "../../components/imageSlider/ImageSlider";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthUser from "../../utils/AuthUser";
 import { toast } from "react-toastify";
 
 const cx = classNames.bind(styles);
 
 const Login = () => {
+  const location = useLocation()
+
   const slides = [
     { url: carousel1, title: "Carousel 1" },
     { url: carousel2, title: "Carousel 2" },
@@ -56,6 +58,9 @@ const Login = () => {
   const ROLE_USER = "user";
 
   const onFinish = (values) => {
+    const { from } = location.state || { from: '/' };
+    console.log('from:', from)
+
     const formData = new FormData();
 
     formData.append("email", values.email);
@@ -75,7 +80,12 @@ const Login = () => {
         saveToken(access_token, refresh_token, user);
 
         if (user.role === ROLE_USER) {
-          navigate("/")
+          navigate(from, {
+            state: {
+              isEditAllowed: false
+            }
+          })
+          
           toast.success(`Welcome back ${user.username}`, {
             position: "top-right",
             autoClose: 3000,

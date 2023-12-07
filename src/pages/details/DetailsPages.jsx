@@ -18,11 +18,12 @@ import { toast } from 'react-toastify';
 import { RiErrorWarningFill } from "react-icons/ri";
 import Comment from "../../components/comment/Comment";
 import Footer from "../../components/footer/Footer";
+import { format } from "date-fns";
 
 const cx = classNames.bind(styles);
 
 const DetailsPages = () => {
-  const { http, accessToken, setAuthorizationHeader } = AuthUser();
+  const { http, accessToken, username, setAuthorizationHeader } = AuthUser();
 
   const location = useLocation()
   const { isEditAllowed } = location.state
@@ -33,6 +34,8 @@ const DetailsPages = () => {
   const [isOnModeEditBlog, setIsOnModeEditBlog] = useState(false)
   const [isModalCreateCommentOpen, setIsModalCreateCommentOpen] = useState(false)
   const [listCategories, setListCategories] = useState([])
+  const [comment, setComment] = useState('')
+  const [contentError, setContentError] = useState(false);
 
   const navigate = useNavigate()
 
@@ -45,12 +48,52 @@ const DetailsPages = () => {
     },
   };
 
+  const updateNewsModule = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+      ['blockquote', 'code-block'],
+
+      [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
+      [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+      [{ 'direction': 'rtl' }],                         // text direction
+
+      [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['link', 'image', 'video', 'formula'],          // add's image support
+
+      [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+      [{ 'font': [] }],
+      [{ 'align': [] }],
+
+      ['clean'] // remove formatting button
+    ],
+  };
+
+  const createCommentModule = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+      ['blockquote', 'code-block'],
+
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
+      [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+
+      [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+      [{ 'align': [] }],
+
+      ['clean'] // remove formatting button
+    ],
+  }
+
   const getFirebaseImageURL = async (imagePath) => {
     const imageRef = ref(storage, imagePath);
 
     try {
       const url = await getDownloadURL(imageRef);
-      console.log('Url:', url)
       return url;
     } catch (error) {
       console.error('Error getting image URL', error);
@@ -81,11 +124,7 @@ const DetailsPages = () => {
   }
 
   // ---------------------------  Handle Delete Blog Event  ---------------------------
-  const handleOk = () => {
-    setIsModalDeleteBlogOpen(false)
-  }
-
-  const handleCancel = () => {
+  const handleCloseModalDeleteBlog = () => {
     setIsModalDeleteBlogOpen(false)
   }
 
@@ -182,8 +221,81 @@ const DetailsPages = () => {
   }
 
   // --------------------------     Handle Comment     --------------------------
+  const handleCloseModalCreateComment = () => {
+    setIsModalCreateCommentOpen(false)
+  }
+
   const handleOpenModalCreateComment = () => {
-    setIsModalCreateCommentOpen(!isModalCreateCommentOpen)
+    if (accessToken != null) {
+      setIsModalCreateCommentOpen(!isModalCreateCommentOpen)
+      setContentError(false);
+    } else {
+      // Lưu lại đường dẫn hiện tại
+      const currentPath = window.location.pathname;
+
+      Swal.fire({
+        title: 'Not authorized yet',
+        text: 'Please login first',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Close',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', { 
+            state: { 
+              from: currentPath,
+            } 
+          });
+        } 
+      })
+    }
+  }
+
+  const onChangeComment = (value) => {
+    setComment(value)
+    console.log('Comment:', value)
+  }
+
+  const handleCreateComment = () => {
+    if (!comment.trim()) {
+      setContentError(true);
+    } else {
+      setContentError(false);
+
+      const formData = new FormData();
+      formData.append('text', comment);
+      formData.append('news', id);
+  
+      if (accessToken != null) {
+        setAuthorizationHeader(accessToken);
+  
+      }
+  
+      http.post(`user/comment/store/`, formData)
+        .then(() => {
+          Swal.fire(
+            'Ta~Da~',
+            'You\'ve create your comment successfully',
+            'success'
+          ).then(() => {
+            navigate(0);
+          })
+        })
+        .catch((reject) => {
+          console.log(reject);
+          toast.error('Oops. Try again', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
+        })
+    }
   }
 
   // --------------------------     Fetch API     --------------------------
@@ -207,6 +319,7 @@ const DetailsPages = () => {
     const fetchData = async () => {
       try {
         const response = await http.get(`/admin/detail-news/${id}`);
+        console.log('Detail:', response)
         const newsDetail = response.data;
 
         // Update image URL
@@ -240,8 +353,6 @@ const DetailsPages = () => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize]);
-
-  // --------------------------     Fetch API     --------------------------
 
   return (
     <div className={cx("details-container")}>
@@ -347,7 +458,9 @@ const DetailsPages = () => {
                   ]}
                 >
                   <TextEditor
+                    modules={updateNewsModule}
                     value={newsDetail.text}
+                    placeholder={"Your Blog's Content"} 
                   />
                 </Form.Item>
                 <Form.Item
@@ -367,7 +480,19 @@ const DetailsPages = () => {
             </div>
           ) : (
             <>
-              <h1 className={cx("details-blog__title")}>{newsDetail.title}</h1>
+              <div className={cx("details-blog-header")}>
+                <h1 className={cx("details-blog-header__top")}>{newsDetail.title}</h1>
+                <div className={cx("details-blog-header__bottom")}>
+                  <p>Author: <span className={cx("author")}>{newsDetail.author}</span></p>
+                  <p className={cx("published_date")}>
+                    {newsDetail.created_at ? (
+                      <p>Published date: {format(new Date(newsDetail.created_at), 'dd/MM/yyyy')}</p>
+                    ) : (
+                      <></>
+                    )}
+                  </p>
+                </div>
+              </div>
               <p className={cx("details-blog__content")} dangerouslySetInnerHTML={{ __html: newsDetail.text }}></p>
 
               <div className={cx("review-wrapper")}>
@@ -385,10 +510,13 @@ const DetailsPages = () => {
                   if (index === listComments.length - 1) {
                     return (
                       <Comment
+                        commentId={comment.id}
                         avatar={comment.avatar}
                         comment={comment.text}
+                        publishedDate={comment.created_at}
                         username={comment.author}
                         email={comment.email}
+                        isEditAllowed={comment.author === username ? true : false}
                       />
                     )
                   } else {
@@ -396,10 +524,13 @@ const DetailsPages = () => {
                       <>
                         <Comment
                           key={comment.id}
+                          commentId={comment.id}
                           avatar={comment.avatar}
                           comment={comment.text}
+                          publishedDate={comment.created_at}
                           username={comment.author}
                           email={comment.email}
+                          isEditAllowed={comment.author === username ? true : false}
                         />
                         <Divider className={cx("seperate-line")} />
                       </>
@@ -426,18 +557,18 @@ const DetailsPages = () => {
           )}
         </div>
       </div>
+      {/* Modal Delete Blog */}
       <Modal
-        title="Xoá bài viết"
+        title="Delete Blog"
         open={isModalDeleteBlogOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        onOk={handleDeleteBlog}
+        onCancel={handleCloseModalDeleteBlog}
         footer={[
           <>
             <Button
               type="primary"
               className={cx("btn-confirm-delete")}
               key="delete"
-              onClick={handleDeleteBlog}
             >
               OK
             </Button>
@@ -445,46 +576,56 @@ const DetailsPages = () => {
               type="primary"
               className={cx("btn-cancel-delete")}
               key="back"
-              onClick={handleCancel}
+              onClick={handleCloseModalDeleteBlog}
             >
-              Huỷ
+              Cancel
             </Button>
           </>
         ]}
       >
         <div className={cx("modal-wrapper")}>
           <RiErrorWarningFill size={30} style={{ color: '#ED5253' }} />
-          <h2 style={{ textAlign: 'center' }}>Xác nhận xoá bài viết này?</h2>
+          <h2 style={{ textAlign: 'center' }}>Confirm delete this blog?</h2>
         </div>
       </Modal>
+      {/* Create Comment */}
       <Modal
-        title="Tạo Comment"
+        title="Create Comment"
         open={isModalCreateCommentOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        onOk={handleCreateComment}
+        onCancel={handleCloseModalCreateComment}
         footer={[
           <>
             <Button
               type="primary"
-              className={cx("btn-confirm-delete")}
-              key="delete"
-              onClick={handleDeleteBlog}
+              key="create"
+              onClick={handleCreateComment}
             >
-              OK
+              Create
             </Button>
             <Button
               type="primary"
               className={cx("btn-cancel-delete")}
               key="back"
-              onClick={handleCancel}
+              onClick={handleCloseModalCreateComment}
             >
-              Huỷ
+              Cancel
             </Button>
           </>
         ]}
       >
         <div className={cx("modal-wrapper")}>
-          <TextEditor />
+          <TextEditor 
+            modules={createCommentModule} 
+            value={comment} 
+            placeholder={"Write your comment"} 
+            onChange={onChangeComment} 
+          />
+          {contentError && (
+            <div className={cx("error-message")}>
+              Content is required
+            </div>
+          )}
         </div>
       </Modal>
       <Footer />
