@@ -3,8 +3,8 @@ import styles from "./Comment.module.scss";
 import classNames from "classnames/bind";
 import { BsFlagFill } from "react-icons/bs";
 import { Button, Modal } from "antd";
-import { ref, getDownloadURL } from "firebase/storage"
-import { storage } from '../../utils/firebase'
+import { ref, getDownloadURL } from "firebase/storage";
+import { storage } from "../../utils/firebase";
 import Draggable from "react-draggable";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import UserProfileModal from "../userProfileModal/UserProfileModal";
@@ -22,9 +22,17 @@ import { BsFillReplyFill } from "react-icons/bs";
 
 const cx = classNames.bind(styles);
 
-const Comment = ({ commentId, avatar, comment, publishedDate, username, email, isEditAllowed, toggleReportModal }) => {
-
-  const { http, accessToken, setAuthorizationHeader } = AuthUser()
+const Comment = ({
+  commentId,
+  avatar,
+  comment,
+  publishedDate,
+  username,
+  email,
+  isEditAllowed,
+  toggleReportModal,
+}) => {
+  const { http, accessToken, setAuthorizationHeader } = AuthUser();
 
   // Fetch image state
   const [avatarUrl, setAvatarUrl] = useState(null);
@@ -33,72 +41,72 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
   const imageRef = ref(storage, avatar);
 
   const [openModal, setOpenModal] = useState(false);
-  const [isModalEditCommentOpen, setIsModalEditCommentOpen] = useState(false)
+  const [isModalEditCommentOpen, setIsModalEditCommentOpen] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  // Handle click out boundary of modal 
+  // Handle click out boundary of modal
   const handleOk = () => {
     setOpenModal(false);
-  }
+  };
 
   // Handle click button "X" of modal
   const handleCancel = () => {
     setOpenModal(false);
-  }
+  };
 
   const handleClickUsername = () => {
-    setOpenModal(true)
-  }
+    setOpenModal(true);
+  };
 
   // --------------------------     Handle Comment     --------------------------
-  const [content, setContent] = useState(comment)
+  const [content, setContent] = useState(comment);
   const [contentError, setContentError] = useState(false);
 
   const editCommentModule = {
     toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
-      ['blockquote', 'code-block'],
+      ["bold", "italic", "underline", "strike"], // toggled buttons
+      ["blockquote", "code-block"],
 
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
-      [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ script: "sub" }, { script: "super" }], // superscript/subscript
+      [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
 
-      [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
 
-      [{ 'align': [] }],
+      [{ align: [] }],
 
-      ['clean'] // remove formatting button
+      ["clean"], // remove formatting button
     ],
-  }
+  };
 
   const handleOpenModalEditComment = () => {
     if (accessToken != null) {
-      setIsModalEditCommentOpen(!isModalEditCommentOpen)
+      setIsModalEditCommentOpen(!isModalEditCommentOpen);
       setContentError(false);
     } else {
       // Lưu lại đường dẫn hiện tại
       const currentPath = window.location.pathname;
 
       Swal.fire({
-        title: 'Not authorized yet',
-        text: 'Please login first',
-        icon: 'info',
+        title: "Not authorized yet",
+        text: "Please login first",
+        icon: "info",
         showCancelButton: true,
-        confirmButtonText: 'Login',
-        cancelButtonText: 'Close',
+        confirmButtonText: "Login",
+        cancelButtonText: "Close",
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/login', { 
-            state: { 
+          navigate("/login", {
+            state: {
               from: currentPath,
-            } 
+            },
           });
-        } 
-      })
+        }
+      });
     }
-  }
+  };
 
   const handleEditComment = () => {
     if (!content.trim()) {
@@ -107,25 +115,26 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
       setContentError(false);
 
       const formData = new FormData();
-      formData.append('text', content);
-  
+      formData.append("text", content);
+
       if (accessToken != null) {
         setAuthorizationHeader(accessToken);
       }
-  
-      http.put(`user/comment/update/${commentId}/`, formData)
+
+      http
+        .put(`user/comment/update/${commentId}/`, formData)
         .then(() => {
           Swal.fire(
-            'Ta~Da~',
-            'You\'ve update your comment successfully',
-            'success'
+            "Ta~Da~",
+            "You've update your comment successfully",
+            "success"
           ).then(() => {
             navigate(0);
-          })
+          });
         })
         .catch((reject) => {
           console.log(reject);
-          toast.error('Oops. Try again', {
+          toast.error("Oops. Try again", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -134,23 +143,23 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
             draggable: true,
             progress: undefined,
             theme: "colored",
-          })
-        })
+          });
+        });
     }
-  }
+  };
 
   const handleCloseModalEditComment = () => {
-    setIsModalEditCommentOpen(false)
-  }
+    setIsModalEditCommentOpen(false);
+  };
 
   const onChangeContent = (value) => {
-    setContent(value)
-    console.log('Comment:', value)
-  }
+    setContent(value);
+    console.log("Comment:", value);
+  };
 
   // ---------------------------      Modal Draggable      ---------------------------
   const draggleRef = useRef(null);
-  const [disabled,] = useState(false);
+  const [disabled] = useState(false);
   const [bounds, setBounds] = useState({
     left: 0,
     top: 0,
@@ -174,16 +183,20 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
 
   useEffect(() => {
     const fetchAvatar = () => {
-      getDownloadURL(imageRef).then((resolve) => {
-        setAvatarUrl(resolve);
-      }).catch((reject) => {
-        console.log(reject)
-      })
-    }
+      if (avatar != "") {
+        getDownloadURL(imageRef)
+          .then((resolve) => {
+            setAvatarUrl(resolve);
+          })
+          .catch((reject) => {
+            console.log(reject);
+          });
+      }
+    };
 
     fetchAvatar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   return (
     <div className={cx("comment-wrapper")}>
@@ -196,7 +209,9 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
             effect="blur"
             placeholderSrc={avatarUrl}
           />
-          <p onClick={handleClickUsername} className={cx("comment-username")}>{username}</p>
+          <p onClick={handleClickUsername} className={cx("comment-username")}>
+            {username}
+          </p>
         </div>
         <div className={cx("left-bottom")}>
           <div className={cx("left-bottom__date")}>
@@ -217,16 +232,23 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
       <div className={cx("comment-wrapper__right")}>
         <div className={cx("right-top")}>
           <div className={cx("comment-published-date")}>
-            <p>{format(new Date(publishedDate), 'dd/MM/yyyy')}</p>
+            <p>{format(new Date(publishedDate), "dd/MM/yyyy")}</p>
           </div>
           <div className={cx("comment-interact")}>
             <FaShareAlt className={cx("comment-interact__share")} />
             <FaBookmark className={cx("comment-interact__bookmark")} />
-            <p onClick={handleClickUsername} className={cx("comment-interact__number")}>{username}</p>
+            <p
+              onClick={handleClickUsername}
+              className={cx("comment-interact__number")}
+            >
+              {username}
+            </p>
           </div>
         </div>
-        <div className={cx("right-middle")} dangerouslySetInnerHTML={{ __html: comment }}>
-        </div>
+        <div
+          className={cx("right-middle")}
+          dangerouslySetInnerHTML={{ __html: comment }}
+        ></div>
         <div className={cx("right-bottom")}>
           <div onClick={toggleReportModal} className={cx("right-bottom__left")}>
             <MdReport className={cx("report-icon")} />
@@ -286,11 +308,7 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
         onCancel={handleCloseModalEditComment}
         footer={[
           <>
-            <Button
-              type="primary"
-              key="edit"
-              onClick={handleEditComment}
-            >
+            <Button type="primary" key="edit" onClick={handleEditComment}>
               Update
             </Button>
             <Button
@@ -301,20 +319,18 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
             >
               Cancel
             </Button>
-          </>
+          </>,
         ]}
       >
         <div className={cx("modal-wrapper")}>
-          <TextEditor 
-            modules={editCommentModule} 
-            value={content} 
-            placeholder={"Write your comment"} 
-            onChange={onChangeContent} 
+          <TextEditor
+            modules={editCommentModule}
+            value={content}
+            placeholder={"Write your comment"}
+            onChange={onChangeContent}
           />
           {contentError && (
-            <div className={cx("error-message")}>
-              Content is required
-            </div>
+            <div className={cx("error-message")}>Content is required</div>
           )}
         </div>
       </Modal>

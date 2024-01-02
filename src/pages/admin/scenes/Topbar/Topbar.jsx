@@ -9,11 +9,18 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Logout } from "@mui/icons-material";
 
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const navigate = useNavigate();
+
+  const logout = () => {
+    navigate("/login");
+  };
 
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
@@ -38,14 +45,8 @@ const Topbar = () => {
             <LightModeOutlinedIcon />
           )}
         </IconButton>
-        <IconButton>
-          <NotificationsOutlinedIcon />
-        </IconButton>
-        <IconButton>
-          <SettingsOutlinedIcon />
-        </IconButton>
-        <IconButton>
-          <PersonOutlinedIcon />
+        <IconButton onClick={logout}>
+          <Logout />
         </IconButton>
       </Box>
     </Box>

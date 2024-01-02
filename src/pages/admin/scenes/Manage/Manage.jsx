@@ -1,5 +1,5 @@
 import "./Manage.css";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { mockDataTeam } from "../../data/mockData";
@@ -19,11 +19,13 @@ const Manage = () => {
   const theme = useTheme();
   const [adminList, setAdminList] = useState([]);
   const colors = tokens(theme.palette.mode);
+  const [status, setStatus] = useState(true);
+
   const columns = [
     { field: "id", headerName: "ID" },
     {
-      field: "username",
-      headerName: "User Name",
+      field: "adminname",
+      headerName: "Admin Name",
       flex: 1,
     },
     {
@@ -34,21 +36,72 @@ const Manage = () => {
     {
       field: "status",
       headerName: "Status",
-      flex: 1,
-      renderCell: ({ row: { Status } }) => {
-        if (Status === "active") return <CheckIcon />;
-        else return <ClearIcon />;
+      renderCell: ({ row: { status } }) => {
+        return (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              width: "100%",
+            }}
+          >
+            {status === "active" ? (
+              <CheckIcon
+                style={{
+                  color: colors.greenAccent[300],
+                }}
+              />
+            ) : (
+              <ClearIcon
+                style={{
+                  color: colors.redAccent[300],
+                }}
+              />
+            )}
+          </div>
+        );
       },
     },
+    // {
+    //   field: "status",
+    //   headerName: "Status",
+    //   width: 200,
+    //   renderCell: (params) => {
+    //     const { status } = params.row;
+
+    //     const handleEditClick = () => {
+    //       if (status === "active") {
+    //         // Thực hiện hành động khi status là "active"
+    //         console.log("Change to inactive");
+    //       } else {
+    //         // Thực hiện hành động khi status không phải là "active"
+    //         console.log("Change to active");
+    //       }
+    //     };
+
+    //     return (
+    //       <Box display="flex" borderRadius="4px">
+    //         <Button
+    //           startIcon={status === "active" ? <CheckIcon /> : <ClearIcon />}
+    //           onClick={handleEditClick}
+    //         >
+    //           {"Change Status"}
+    //         </Button>
+    //       </Box>
+    //     );
+    //   },
+    // },
   ];
 
   useEffect(() => {
     const fetchData = async () => {
       await http
-        .get(`/auth/list-admin/`)
+        .get(`/admin/list-admin/`)
         .then((resolve) => {
-          console.log(resolve);
-          const dataWithIds = resolve.data.admin_users.map((item, index) => ({
+          // console.log(resolve);
+          const dataWithIds = resolve.data.admins.map((item, index) => ({
             id: index + 1,
             ...item,
           }));
@@ -65,7 +118,7 @@ const Manage = () => {
 
   const handleDoubleClickCell = async (params) => {
     const { row } = params;
-    console.log(row);
+    console.log("go to  info", row);
   };
 
   return (
@@ -104,7 +157,8 @@ const Manage = () => {
         <DataGrid
           rows={adminList}
           columns={columns}
-          onCellClick={handleDoubleClickCell}
+          onRowDoubleClick={handleDoubleClickCell}
+          hideFooterSelectedRowCount={true}
         />
       </Box>
     </Box>

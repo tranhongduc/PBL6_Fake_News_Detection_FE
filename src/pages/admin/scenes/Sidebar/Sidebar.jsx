@@ -1,10 +1,13 @@
 import "./Sidebar.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import { storage } from "../../../../utils/firebase";
+import { ref, getDownloadURL } from "firebase/storage";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
@@ -18,6 +21,7 @@ import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import React from "react";
+import AuthUser from "../../../../utils/AuthUser";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -27,6 +31,7 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
       active={selected === title}
       style={{
         color: colors.grey[100],
+        fontSize: "20px",
       }}
       onClick={() => setSelected(title)}
       icon={icon}
@@ -42,6 +47,30 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const { userId, username, avatar } = AuthUser();
+
+  // Fetch image state
+  const [avatarUrl, setAvatarUrl] = useState(null);
+
+  // Create a reference from a Google Cloud Storage URI
+  const imageRef = ref(storage, avatar);
+
+  useEffect(() => {
+    const fetchAvatar = () => {
+      if (avatar != "") {
+        getDownloadURL(imageRef)
+          .then((resolve) => {
+            setAvatarUrl(resolve);
+          })
+          .catch((reject) => {
+            console.log(reject);
+          });
+      }
+    };
+
+    fetchAvatar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box
@@ -95,12 +124,12 @@ const Sidebar = () => {
             {!isCollapsed && (
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
-                  <img
-                    alt="profile-user"
-                    width="100px"
-                    height="100px"
-                    src={`../../assets/user.png`}
-                    style={{ cursor: "pointer", borderRadius: "50%" }}
+                  <LazyLoadImage
+                    key={avatarUrl}
+                    src={avatarUrl}
+                    alt={`${avatarUrl}`}
+                    effect="blur"
+                    placeholderSrc={avatarUrl}
                   />
                 </Box>
                 <Box textAlign="center">
@@ -110,11 +139,11 @@ const Sidebar = () => {
                     fontWeight="bold"
                     sx={{ m: "10px 0 0 0" }}
                   >
-                    Ed Roh
+                    {username}
                   </Typography>
-                  <Typography variant="h5" color={colors.greenAccent[500]}>
+                  {/* <Typography variant="h5" color={colors.greenAccent[500]}>
                     VP Fancy Admin
-                  </Typography>
+                  </Typography> */}
                 </Box>
               </Box>
             )}
@@ -131,6 +160,9 @@ const Sidebar = () => {
               <Typography
                 variant="h6"
                 color={colors.grey[300]}
+                style={{
+                  fontSize: "20px",
+                }}
                 sx={{ m: "15px 0 5px 20px" }}
               >
                 Data
