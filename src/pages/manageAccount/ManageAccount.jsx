@@ -4,7 +4,7 @@ import classNames from "classnames/bind";
 import Swal from "sweetalert2";
 import AuthUser from '../../utils/AuthUser';
 import background from '../../assets/images/background.jpeg'
-import ConfirmationToast from '../../components/confirmationToast/ConfirmationToast';
+import ConfirmationToast from '../../components/ConfirmationToast/ConfirmationToast';
 import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen } from '@fortawesome/free-solid-svg-icons'

@@ -31,12 +31,11 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                gap: 8px ;
                 font-size: 16px;
                 font-weight: 500;
                 color: #000;
-                transition: 0.3s;
                 margin-right: 30px;
+                gap: 20px;
 
                 a {
                     font-size: 24px;
@@ -44,12 +43,12 @@
                     text-transform: capitalize;
                     color: #000;
                     margin-right: 0;
-                }
+                    transition: 0.3s;
 
-                &:hover {
-                    cursor: pointer;
-                    opacity: 0.8;
-                    color: #FFF;
+                    &:hover {
+                        cursor: pointer;
+                        opacity: 0.8;
+                    }
                 }
             }
         }
@@ -107,7 +106,7 @@
                     top: 0;
                     border-radius: 50%;
                     object-fit: cover;
-                    border: 2px solid #FF8682;
+                    border: 2px solid #8ED3BB;
     
                     &:hover {
                         cursor: pointer;
@@ -221,7 +220,7 @@
 .btn-login {
     color: #fff;
     font-weight: 500;
-    background-color: #ff8682;
+    background-color: #8ED3BB;
     border: none;
     border-radius: 8px;
     padding: 12px 20px;
@@ -237,7 +236,7 @@
 
     &:hover {
         cursor: pointer;
-        background-color: #ff8682;
+        background-color: #8ED3BB;
         color: #fff;
         opacity: 0.8;
     }

@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react"
 import styles from './DetailsPages.module.scss'
 import classNames from "classnames/bind";
 import { BsPencilSquare } from "react-icons/bs"
-import { AiOutlineDelete } from "react-icons/ai"
+import { AiOutlineDelete, AiOutlineClose } from "react-icons/ai"
 import { useLocation, useParams } from "react-router-dom"
 import { useEffect } from "react"
 import Header from "../../components/header/Header";
@@ -20,27 +20,41 @@ import Comment from "../../components/comment/Comment";
 import Footer from "../../components/footer/Footer";
 import { v4 } from "uuid";
 import { format } from "date-fns";
+import { BsFillReplyFill } from "react-icons/bs";
+import { FaEye } from "react-icons/fa";
 
 const cx = classNames.bind(styles);
 
 const DetailsPages = () => {
-  const { http, accessToken, username, setAuthorizationHeader } = AuthUser();
+  const { http, accessToken, username, avatar, setAuthorizationHeader } = AuthUser();
 
   const location = useLocation()
   const { isEditAllowed } = location.state
 
   const { id } = useParams()
   const [newsDetail, setNewsDetail] = useState({})
-  const [isModalDeleteBlogOpen, setIsModalDeleteBlogOpen] = useState(false)
-  const [isOnModeEditBlog, setIsOnModeEditBlog] = useState(false)
-  const [isModalCreateCommentOpen, setIsModalCreateCommentOpen] = useState(false)
   const [listCategories, setListCategories] = useState([])
   const [comment, setComment] = useState('')
   const [contentError, setContentError] = useState(false);
   const [image, setImage] = useState("");
   const inputRef = useRef(null);
 
+  const [isModalDeleteBlogOpen, setOpenModalDeleteBlog] = useState(false)
+  const [isOnModeEditBlog, setOnModeEditBlog] = useState(false)
+  // const [isModalCreateCommentOpen, setIsModalCreateCommentOpen] = useState(false)
+  const [isReportModalOpen, setOpenReportModal] = useState(false)
+  const [selectedOption, setSelectedOption] = useState(null);
+
   const navigate = useNavigate()
+
+  const radioOptions = [
+    { id: 1, label: "Spam or Unwanted Content", description: "This comment contains spam or unwanted content unrelated to the blog post" },
+    { id: 2, label: "Offensive Language", description: "The comment uses offensive language or violates community guidelines" },
+    { id: 3, label: "Misleading Information", description: "The comment provides misleading or false information" },
+    { id: 4, label: "Personal Attack or Harassment", description: "The comment includes a personal attack, harassment, or inappropriate behavior" },
+    { id: 5, label: "Inappropriate or Sensitive Content", description: "The comment contains content that is inappropriate or sensitive in nature" },
+    { id: 6, label: "Other", description: "Please use \"More Information\" field to explain further" },
+  ];
 
   const createPostFormLayout = {
     labelCol: {
@@ -85,12 +99,20 @@ const DetailsPages = () => {
 
       [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['link', 'image', 'video', 'formula'],          // add's image support
 
+      [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+      [{ 'font': [] }],
       [{ 'align': [] }],
 
       ['clean'] // remove formatting button
     ],
   }
+
+  // Hàm xử lý khi chọn một radio button
+  const handleRadioChange = (option) => {
+    setSelectedOption(option.id);
+  };
 
   const getFirebaseImageURL = async (imagePath) => {
     const imageRef = ref(storage, imagePath);
@@ -138,13 +160,25 @@ const DetailsPages = () => {
     setImage(file)
   }
 
+  // ---------------------------  Handle Close Report Modal  ---------------------------
+  const handleCloseReportModal = () => {
+    const modalClose = document.querySelector('.DetailsPages_report-modal-container__pf6H3'); 
+
+    // Thêm lớp close ngay khi đóng modal
+    modalClose.classList.add(styles.close);
+
+    setTimeout(() => {
+      setOpenReportModal(false);
+    }, 400);
+  }
+
   // ---------------------------  Handle Delete Blog Event  ---------------------------
   const handleCloseModalDeleteBlog = () => {
-    setIsModalDeleteBlogOpen(false)
+    setOpenModalDeleteBlog(false)
   }
 
   const handleOpenModalDeleteBlog = () => {
-    setIsModalDeleteBlogOpen(true)
+    setOpenModalDeleteBlog(true)
   }
 
   const handleDeleteBlog = () => {
@@ -176,7 +210,7 @@ const DetailsPages = () => {
 
   // ---------------------------  Handle Update Blog Event  ---------------------------
   const handleEditBlog = () => {
-    setIsOnModeEditBlog(!isOnModeEditBlog)
+    setOnModeEditBlog(!isOnModeEditBlog)
   }
 
   // ---------------------------  Handle Update Blog Form  ---------------------------
@@ -195,18 +229,18 @@ const DetailsPages = () => {
         getDownloadURL(newsRef).then((url) => {
           // Upload ảnh lên Firebase Storage
           const formData = new FormData();
-          
+
           const { title, category, text } = values
-  
+
           formData.append('title', title)
           formData.append('category', category)
           formData.append('text', text)
           formData.append('image', url);
-  
+
           if (accessToken != null) {
             setAuthorizationHeader(accessToken);
           }
-  
+
           http.put(`user/news/update/${id}/`, formData)
             .then(() => {
               Swal.fire(
@@ -219,7 +253,7 @@ const DetailsPages = () => {
             })
             .catch((reject) => {
               console.log(reject);
-  
+
               const { text } = reject.response.data
               if (text !== undefined) {
                 toast.error(text[0], {
@@ -265,15 +299,15 @@ const DetailsPages = () => {
         )
       } else {
         const formData = new FormData();
-  
+
         formData.append('title', title)
         formData.append('category', category)
         formData.append('text', text)
-    
+
         if (accessToken != null) {
           setAuthorizationHeader(accessToken);
         }
-    
+
         http.put(`user/news/update/${id}/`, formData)
           .then(() => {
             Swal.fire(
@@ -327,14 +361,14 @@ const DetailsPages = () => {
   }
 
   // --------------------------     Handle Comment     --------------------------
-  const handleCloseModalCreateComment = () => {
-    setIsModalCreateCommentOpen(false)
-  }
+  // const handleCloseModalCreateComment = () => {
+  //   setIsModalCreateCommentOpen(false)
+  // }
 
   const handleOpenModalCreateComment = () => {
     if (accessToken != null) {
-      setIsModalCreateCommentOpen(!isModalCreateCommentOpen)
-      setContentError(false);
+      // setIsModalCreateCommentOpen(!isModalCreateCommentOpen)
+      // setContentError(false);
     } else {
       // Lưu lại đường dẫn hiện tại
       const currentPath = window.location.pathname;
@@ -473,7 +507,7 @@ const DetailsPages = () => {
           {image ? (
             <>
               <p>{image.name}</p>
-              <img style={{objectFit: 'cover'}} src={URL.createObjectURL(image)} alt='blogImage' className={cx("scaled-img")} />
+              <img style={{ objectFit: 'cover' }} src={URL.createObjectURL(image)} alt='blogImage' className={cx("scaled-img")} />
             </>
           ) : (
             <LazyLoadImage
@@ -622,43 +656,21 @@ const DetailsPages = () => {
                 <div className={cx("review-wrapper__left")}>
                   <h2>Comments</h2>
                 </div>
-                <div className={cx("review-wrapper__right")}>
-                  <button onClick={handleOpenModalCreateComment}>
-                    Create comment
-                  </button>
-                </div>
               </div>
               <div className={cx("comment")}>
                 {listComments.map((comment, index) => {
-                  if (index === listComments.length - 1) {
-                    return (
-                      <Comment
-                        commentId={comment.id}
-                        avatar={comment.avatar}
-                        comment={comment.text}
-                        publishedDate={comment.created_at}
-                        username={comment.author}
-                        email={comment.email}
-                        isEditAllowed={comment.author === username ? true : false}
-                      />
-                    )
-                  } else {
-                    return (
-                      <>
-                        <Comment
-                          key={comment.id}
-                          commentId={comment.id}
-                          avatar={comment.avatar}
-                          comment={comment.text}
-                          publishedDate={comment.created_at}
-                          username={comment.author}
-                          email={comment.email}
-                          isEditAllowed={comment.author === username ? true : false}
-                        />
-                        <Divider className={cx("seperate-line")} />
-                      </>
-                    )
-                  }
+                  return (
+                    <Comment
+                      commentId={comment.id}
+                      avatar={comment.avatar}
+                      comment={comment.text}
+                      publishedDate={comment.created_at}
+                      username={comment.author}
+                      email={comment.email}
+                      isEditAllowed={comment.author === username ? true : false}
+                      toggleReportModal={() => setOpenReportModal(!isReportModalOpen)}
+                    />
+                  )
                 })}
                 <div className={cx("pagination")}>
                   <Pagination
@@ -676,10 +688,94 @@ const DetailsPages = () => {
                   />
                 </div>
               </div>
+              <div className={cx("seperate-line")}></div>
+              <div className={cx("comment-wrapper")}>
+                <div className={cx("comment-wrapper__left")}>
+                  <LazyLoadImage
+                    key={avatar}
+                    src={avatar}
+                    alt={`${avatar}`}
+                    effect="blur"
+                    placeholderSrc={avatar}
+                  />
+                </div>
+                <div className={cx("vertical-divider")} />
+                <div className={cx("comment-wrapper__right")}>
+                  <div className={cx("right-top")}>
+                    <TextEditor 
+                      modules={createCommentModule}
+                      value={comment}
+                      placeholder={"Write your comment"}
+                      onChange={onChangeComment}
+                    />
+                  </div>
+                  <div className={cx("right-bottom")}>
+                    <button className={cx("btn-post")} onClick={handleOpenModalCreateComment}>
+                      <BsFillReplyFill size={16} />
+                      <p>POST</p>
+                    </button>
+                    <button className={cx("btn-preview")} onClick={handleOpenModalCreateComment}>
+                      <FaEye size={16} />
+                      <p>PREVIEW</p>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>
       </div>
+      {/* Report modal */}
+      {isReportModalOpen && (
+        <div onClick={handleCloseReportModal} className={cx("report-modal", "report-modal-template")}>
+          <div onClick={(e) => e.stopPropagation()} className={cx("report-modal-container")}>
+            <div className={cx("report-modal__top")}>
+              <p>Report Content</p>
+              <AiOutlineClose onClick={handleCloseReportModal} className={cx("report-modal-close")} />
+            </div>
+            <div className={cx("report-modal__middle")}>
+              <div className={cx("middle-top")}>
+                <div className={cx("middle-top__left")}>
+                  <p>Report reason:</p>
+                </div>
+                <div className={cx("vertical-divider")} />
+                <div className={cx("middle-top__right")}>
+                  {radioOptions.map((option) => (
+                    <div key={option.id} className={cx("report-options")}>
+                      <input
+                        type="radio"
+                        id={`radio-${option.id}`}
+                        name="radio-options"
+                        value={option.id}
+                        checked={selectedOption === option.id}
+                        onChange={() => handleRadioChange(option)}
+                      />
+                      <label htmlFor={`radio-${option.id}`}>
+                        <p style={{margin: 0}}>{option.label}</p>
+                        <span className={cx("option-description")}>{option.description}</span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={cx("middle-bottom")}>
+                <div className={cx("middle-bottom__left")}>
+                  <p>More information:</p>
+                </div>
+                <div className={cx("vertical-divider")}></div>
+                <div className={cx("middle-bottom__right")}>
+                    <textarea cols={68} rows={8} />
+                </div>
+              </div>
+            </div>
+            <div className={cx("report-modal__bottom")}>
+              <button className={cx("report-modal-report")}>
+                <p>REPORT</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Modal Delete Blog */}
       <Modal
         title="Delete Blog"
@@ -711,7 +807,7 @@ const DetailsPages = () => {
           <h2 style={{ textAlign: 'center' }}>Confirm delete this blog?</h2>
         </div>
       </Modal>
-      {/* Create Comment */}
+      {/* Create Comment
       <Modal
         title="Create Comment"
         open={isModalCreateCommentOpen}
@@ -750,7 +846,7 @@ const DetailsPages = () => {
             </div>
           )}
         </div>
-      </Modal>
+      </Modal> */}
       <Footer />
     </div>
   )
