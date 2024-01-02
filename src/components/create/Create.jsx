@@ -3,7 +3,7 @@ import styles from './Create.module.scss'
 import classNames from "classnames/bind";
 import Header from "../header/Header";
 import Footer from "../footer/Footer";
-import img from "../../assets/images/b11.jpeg"
+import defaultImg from "../../assets/images/default-image.jpg"
 import { Form, Input, Select, Button } from 'antd';
 import AuthUser from "../../utils/AuthUser";
 import { toast } from 'react-toastify';
@@ -22,6 +22,7 @@ const Create = () => {
   const inputRef = useRef(null);
   const [image, setImage] = useState("");
   const [listCategories, setListCategories] = useState([])
+  const DEFAULT_IMAGE_LINK = "gs://pbl6-8431d.appspot.com/news/default-image.jpg"
 
   const createPostFormLayout = {
     labelCol: {
@@ -78,75 +79,67 @@ const Create = () => {
     // (Sử dụng API hoặc các phương thức khác để thực hiện tác vụ này)
     const selectedCategory = listCategories.find((category) => category.id === values.category)
     const categoryName = selectedCategory.name
+    
 
-    if (image === "") {
-      Swal.fire(
-        'No photos yet',
-        'Please upload image',
-        'error'
-      )
-      return;
-    } else {
-      const newsRef = ref(storage, `news/${categoryName}/${image.name + v4()}/`);
-      uploadBytes(newsRef, image).then(() => {
-        getDownloadURL(newsRef).then((url) => {
-          // Upload ảnh lên Firebase Storage
-          const formData = new FormData();
-          
-          const { title, category, text } = values
-  
-          formData.append('title', title)
-          formData.append('category', category)
-          formData.append('text', text)
-          formData.append('image', url);
-  
-          if (accessToken != null) {
-            setAuthorizationHeader(accessToken);
-          }
-  
-          http.post('user/news/store/', formData)
-            .then(() => {
-              Swal.fire(
-                'Good job!',
-                'You\'ve created new blog successfully',
-                'success'
-              ).then(() => {
-                navigate(0);
+    const newsRef = ref(storage, `news/${categoryName}/${image.name + v4()}/`);
+    uploadBytes(newsRef, image).then(() => {
+      getDownloadURL(newsRef).then((url) => {
+        // Upload ảnh lên Firebase Storage
+        const formData = new FormData();
+        
+        const { title, category, text } = values
+
+        formData.append('title', title)
+        formData.append('category', category)
+        formData.append('text', text)
+        formData.append('image', url);
+
+        if (accessToken != null) {
+          setAuthorizationHeader(accessToken);
+        }
+
+        http.post('user/news/store/', formData)
+          .then(() => {
+            Swal.fire(
+              'Good job!',
+              'You\'ve created new blog successfully',
+              'success'
+            ).then(() => {
+              navigate(0);
+            })
+          })
+          .catch((reject) => {
+            console.log(reject);
+
+            const { text } = reject.response.data
+            if (text !== undefined) {
+              toast.error(text[0], {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
               })
-            })
-            .catch((reject) => {
-              console.log(reject);
-  
-              const { text } = reject.response.data
-              if (text !== undefined) {
-                toast.error(text[0], {
-                  position: "top-right",
-                  autoClose: 3000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  theme: "colored",
-                })
-              } else {
-                Swal.fire(
-                  'Oops',
-                  'Try again',
-                  'error'
-                )
-              }
-            })
-        }).catch((error) => {
-          console.log('Error:', error)
-          Swal.fire(
-            'Oops',
-            'Try again',
-            'error'
-          )
-        })
+            } else {
+              Swal.fire(
+                'Oops',
+                'Try again',
+                'error'
+              )
+            }
+          })
+      }).catch((error) => {
+        console.log('Error:', error)
+        Swal.fire(
+          'Oops',
+          'Try again',
+          'error'
+        )
       })
-    }
+    })
   }
 
   // Failed case
@@ -197,7 +190,7 @@ const Create = () => {
                 <img src={URL.createObjectURL(image)} alt='image' />
               </>
             ) : (
-              <img src={img} alt='image' />
+              <img src={defaultImg} alt='image' />
             )}
             <input
               type="file"

@@ -8,17 +8,21 @@ import { storage } from '../../utils/firebase'
 import Draggable from "react-draggable";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import UserProfileModal from "../userProfileModal/UserProfileModal";
-import { FaPencilAlt, FaUser } from "react-icons/fa";
+import { FaPencilAlt, FaUser, FaShareAlt, FaBookmark } from "react-icons/fa";
 import { format } from "date-fns";
 import AuthUser from "../../utils/AuthUser";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import TextEditor from "../textEditor/TextEditor";
 import { toast } from "react-toastify";
+import { BiSolidMessageRoundedDetail, BiSolidLike } from "react-icons/bi";
+import { MdReport } from "react-icons/md";
+import { AiFillLike } from "react-icons/ai";
+import { BsFillReplyFill } from "react-icons/bs";
 
 const cx = classNames.bind(styles);
 
-const Comment = ({ commentId, avatar, comment, publishedDate, username, email, isEditAllowed }) => {
+const Comment = ({ commentId, avatar, comment, publishedDate, username, email, isEditAllowed, toggleReportModal }) => {
 
   const { http, accessToken, setAuthorizationHeader } = AuthUser()
 
@@ -184,26 +188,63 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
   return (
     <div className={cx("comment-wrapper")}>
       <div className={cx("comment-wrapper__left")}>
-        <LazyLoadImage
-          key={avatarUrl}
-          src={avatarUrl}
-          alt={`${avatarUrl}`}
-          effect="blur"
-          placeholderSrc={avatarUrl}
-        />
+        <div className={cx("left-top")}>
+          <LazyLoadImage
+            key={avatarUrl}
+            src={avatarUrl}
+            alt={`${avatarUrl}`}
+            effect="blur"
+            placeholderSrc={avatarUrl}
+          />
+          <p onClick={handleClickUsername} className={cx("comment-username")}>{username}</p>
+        </div>
+        <div className={cx("left-bottom")}>
+          <div className={cx("left-bottom__date")}>
+            <FaUser />
+            <p onClick={handleClickUsername}>{username}</p>
+          </div>
+          <div className={cx("left-bottom__message")}>
+            <BiSolidMessageRoundedDetail />
+            <p onClick={handleClickUsername}>{username}</p>
+          </div>
+          <div className={cx("left-bottom__like")}>
+            <BiSolidLike />
+            <p onClick={handleClickUsername}>{username}</p>
+          </div>
+        </div>
       </div>
-      <div className={cx("comment-wrapper__middle")}>
-        <div className={cx("comment-username")}>
-          <FaUser />
-          <p onClick={handleClickUsername}>{username}</p>
+      <div className={cx("vertical-divider")}></div>
+      <div className={cx("comment-wrapper__right")}>
+        <div className={cx("right-top")}>
+          <div className={cx("comment-published-date")}>
+            <p>{format(new Date(publishedDate), 'dd/MM/yyyy')}</p>
+          </div>
+          <div className={cx("comment-interact")}>
+            <FaShareAlt className={cx("comment-interact__share")} />
+            <FaBookmark className={cx("comment-interact__bookmark")} />
+            <p onClick={handleClickUsername} className={cx("comment-interact__number")}>{username}</p>
+          </div>
         </div>
-        <div className={cx("comment-detail")} dangerouslySetInnerHTML={{ __html: comment }}>
+        <div className={cx("right-middle")} dangerouslySetInnerHTML={{ __html: comment }}>
         </div>
-        <div className={cx("comment-published-date")}>
-          <p>Commented date: {format(new Date(publishedDate), 'dd/MM/yyyy')}</p>
+        <div className={cx("right-bottom")}>
+          <div onClick={toggleReportModal} className={cx("right-bottom__left")}>
+            <MdReport className={cx("report-icon")} />
+            <p className={cx("report-text")}>Report</p>
+          </div>
+          <div className={cx("right-bottom__right")}>
+            <div className={cx("bottom-right__like")}>
+              <AiFillLike />
+              <p className={cx("like-text")}>Like</p>
+            </div>
+            <div className={cx("bottom-right__reply")}>
+              <BsFillReplyFill />
+              <p className={cx("reply-text")}>Reply</p>
+            </div>
+          </div>
         </div>
       </div>
-      <button className={cx("comment-wrapper__right")}>
+      {/* <button className={cx("comment-wrapper__right")}>
         {isEditAllowed ? (
           <div className={cx("edit")}>
             <FaPencilAlt id="btn-edit-comment" onClick={handleOpenModalEditComment} />
@@ -213,7 +254,7 @@ const Comment = ({ commentId, avatar, comment, publishedDate, username, email, i
             <BsFlagFill />
           </div>
         )}
-      </button>
+      </button> */}
       {/* User Profile */}
       <Modal
         title={

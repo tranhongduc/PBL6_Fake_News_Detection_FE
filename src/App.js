@@ -6,7 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import Unauthorized from "./pages/unauthorized/Unauthorized";
 import NotFound from "./pages/notFound/NotFound";
-import Dashboard from "./pages/admin/scenes/Dashboard/Dashboard";
 
 const Loading = lazy(() => import("./components/loading/Loading"));
 const Home = lazy(() => import("./pages/home/Home"));
@@ -16,7 +15,7 @@ const Account = lazy(() => import("./pages/account/Account"));
 const Create = lazy(() => import("./components/create/Create"));
 const Login = lazy(() => import("./pages/login/Login"));
 const ForgotPassword = lazy(() => import("./pages/forgotPassword/ForgotPassword"))
-const DashBoard = lazy(() => import("./pages/admin/scenes/Dashboard/Dashboard"));
+const Dashboard = lazy(() => import("./pages/admin/scenes/Dashboard/Dashboard"));
 const Team = lazy(() => import("./pages/admin/u/team"));
 const Contacts = lazy(() => import("./pages/admin/u/contacts"));
 const Invoices = lazy(() => import("./pages/admin/u/invoices"));
@@ -158,7 +157,10 @@ const App = () => {
           >
             <Route
               index
-              element={<Dashboard />}
+              element={
+              <Suspense fallback={<Loading />}>
+                <Dashboard />
+              </Suspense>}
             />
 
             <Route

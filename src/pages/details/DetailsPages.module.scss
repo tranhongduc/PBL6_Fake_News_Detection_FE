@@ -38,7 +38,7 @@
         justify-content: space-between;
         align-items: center;
 
-        > p {
+        >p {
             font-size: 24px;
             font-weight: 500;
         }
@@ -175,6 +175,7 @@
 }
 
 .seperate-line {
+    margin-bottom: 20px;
     border: 1px solid #BFC4C1;
 }
 
@@ -187,8 +188,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        
-        > h2 {
+
+        >h2 {
             font-size: 32px;
         }
     }
@@ -198,8 +199,8 @@
         justify-content: center;
         align-items: center;
 
-        > button {
-            background-color: #FF8682;
+        >button {
+            background-color: #8ED3BB;
             border-radius: 5px;
             border: none;
             transition: 0.3s;
@@ -210,20 +211,19 @@
 
             &:hover {
                 cursor: pointer;
-                background-color: #FF8682;
+                background-color: #8ED3BB;
                 opacity: 0.8;
             }
         }
     }
 
-    .comment {
-        margin-top: 20px;
-    }
-
-
     h2 {
         margin: 0;
     }
+}
+
+.comment {
+    margin-top: 30px;
 }
 
 .pagination {
@@ -256,10 +256,281 @@
     transition: 0.3s;
     padding: 12px 20px;
     font-size: 16px;
-  
+
     &:hover {
-      cursor: pointer;
-      opacity: 0.8;
-      background-color: #10ac84 !important;
+        cursor: pointer;
+        opacity: 0.8;
+        background-color: #10ac84 !important;
     }
-  }
+}
+
+.comment-wrapper {
+    background-color: #ebe4e4;
+    display: flex;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    height: 100%;
+    gap: 20px;
+
+    &__left {
+        min-width: 8%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+
+        > span {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+    
+            img {
+                background: #fff;
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                border: 2px solid #8ED3BB;
+                object-fit: cover;
+            }
+        }
+    }
+
+    &__right {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: auto;
+    }
+}
+
+.vertical-divider {
+    border-left: 1px solid #2a2a2a;
+}
+
+.right-bottom {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-post {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+    background-color: #8ED3BB;
+    border-radius: 5px;
+    border: none;
+    transition: 0.3s;
+    height: 36px;
+    padding-inline: 8px;
+
+    >p {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    &:hover {
+        cursor: pointer;
+        background-color: #8ED3BB;
+        opacity: 0.8;
+    }
+}
+
+.btn-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+    background-color: #d2d2d2;
+    border-radius: 5px;
+    border: none;
+    transition: 0.3s;
+    height: 36px;
+    padding-inline: 8px;
+
+    >p {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    &:hover {
+        cursor: pointer;
+        background-color: #d2d2d2;
+        opacity: 0.8;
+    }
+}
+
+.report-modal {
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(1.5px);  // Độ mờ có thể điều chỉnh tùy ý
+
+    &__top {
+        background-color: #d2d2d2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-inline: 14px;
+        border-bottom: 1px solid #8c8c8c;
+
+        > p {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 16px 0;
+        }
+    }
+
+    &__middle {
+        background-color: #ebe4e4;
+        border-bottom: 1px solid #8c8c8c;
+    }
+
+    &__bottom {
+        background-color: #d2d2d2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-block: 10px;
+    }
+}
+
+.report-modal-template {
+    display: flex;
+}
+
+.report-modal-container {
+    background-color: #fff;
+    min-height: 300px;
+    min-width: 740px;
+    position: relative;
+    border-radius: 4px;
+    max-width: calc(100% - 32px);
+    animation: modalFadeIn ease .5s;
+}
+
+.close {
+    animation: modalFadeOut ease .4s;
+}
+
+.report-modal-close {
+    opacity: 0.6;
+    transition: 0.3s;
+
+    &:hover {
+        opacity: 1;
+        cursor: pointer;
+    }
+}
+
+.middle-top {
+    display: flex;
+    gap: 14px;
+
+    &__left {
+        margin-block: 12px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+        min-width: 220px;
+
+        > p {
+            margin: 0;
+        }
+    }
+
+    &__right {
+        margin-top: 12px;
+        margin-right: 24px;
+    }
+}
+
+.report-options {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.option-description {
+    color: #6f6f6f;
+}
+
+.middle-bottom {
+    display: flex;
+    gap: 14px;
+
+    &__left {
+        margin-block: 22px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+        min-width: 220px;
+
+        > p {
+            margin: 0;
+        }
+    }
+
+    &__right {
+        margin-block: 22px;
+    }
+}
+
+.report-modal-report {
+    background: #ec5455;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 36px;
+    transition: 0.3s;
+    box-shadow: rgba(149, 157, 165, 0.7) 4px 4px 6px;
+
+    >p {
+        font-size: 16px;
+        margin: 0;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    &:hover {
+        opacity: 0.8;
+        cursor: pointer;
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-60px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+}
