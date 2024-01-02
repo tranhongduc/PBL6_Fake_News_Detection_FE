@@ -162,7 +162,7 @@ const DetailsPages = () => {
 
   // ---------------------------  Handle Close Report Modal  ---------------------------
   const handleCloseReportModal = () => {
-    const modalClose = document.querySelector('.DetailsPages_report-modal-container__pf6H3'); 
+    const modalClose = document.querySelector('.DetailsPages_report-modal-container__pf6H3');
 
     // Thêm lớp close ngay khi đóng modal
     modalClose.classList.add(styles.close);
@@ -364,6 +364,17 @@ const DetailsPages = () => {
   // const handleCloseModalCreateComment = () => {
   //   setIsModalCreateCommentOpen(false)
   // }
+
+  const handleAuthorized = () => {
+    // Lưu lại đường dẫn hiện tại
+    const currentPath = window.location.pathname;
+
+    navigate('/login', {
+      state: {
+        from: currentPath,
+      }
+    });
+  }
 
   const handleOpenModalCreateComment = () => {
     if (accessToken != null) {
@@ -688,39 +699,48 @@ const DetailsPages = () => {
                   />
                 </div>
               </div>
-              <div className={cx("seperate-line")}></div>
-              <div className={cx("comment-wrapper")}>
-                <div className={cx("comment-wrapper__left")}>
-                  <LazyLoadImage
-                    key={avatar}
-                    src={avatar}
-                    alt={`${avatar}`}
-                    effect="blur"
-                    placeholderSrc={avatar}
-                  />
-                </div>
-                <div className={cx("vertical-divider")} />
-                <div className={cx("comment-wrapper__right")}>
-                  <div className={cx("right-top")}>
-                    <TextEditor 
-                      modules={createCommentModule}
-                      value={comment}
-                      placeholder={"Write your comment"}
-                      onChange={onChangeComment}
+              <div className={cx("seperate-line")} />
+              {accessToken != null ? (
+                <div className={cx("comment-wrapper")}>
+                  <div className={cx("comment-wrapper__left")}>
+                    <LazyLoadImage
+                      key={avatar}
+                      src={avatar}
+                      alt={`${avatar}`}
+                      effect="blur"
+                      placeholderSrc={avatar}
                     />
                   </div>
-                  <div className={cx("right-bottom")}>
-                    <button className={cx("btn-post")} onClick={handleOpenModalCreateComment}>
-                      <BsFillReplyFill size={16} />
-                      <p>POST</p>
-                    </button>
-                    <button className={cx("btn-preview")} onClick={handleOpenModalCreateComment}>
-                      <FaEye size={16} />
-                      <p>PREVIEW</p>
-                    </button>
+                  <div className={cx("vertical-divider")} />
+                  <div className={cx("comment-wrapper__right")}>
+                    <div className={cx("right-top")}>
+                      <TextEditor
+                        modules={createCommentModule}
+                        value={comment}
+                        placeholder={"Write your comment"}
+                        onChange={onChangeComment}
+                      />
+                    </div>
+                    <div className={cx("right-bottom")}>
+                      <button className={cx("btn-post")} onClick={handleOpenModalCreateComment}>
+                        <BsFillReplyFill size={16} />
+                        <p>POST</p>
+                      </button>
+                      <button className={cx("btn-preview")} onClick={handleOpenModalCreateComment}>
+                        <FaEye size={16} />
+                        <p>PREVIEW</p>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className={cx("not-authorized")}>
+                  <button onClick={handleAuthorized}>
+                    <p>You must log in or register to post comment</p>
+                  </button>
+                </div>
+              )}
+
             </>
           )}
         </div>
@@ -751,7 +771,7 @@ const DetailsPages = () => {
                         onChange={() => handleRadioChange(option)}
                       />
                       <label htmlFor={`radio-${option.id}`}>
-                        <p style={{margin: 0}}>{option.label}</p>
+                        <p style={{ margin: 0 }}>{option.label}</p>
                         <span className={cx("option-description")}>{option.description}</span>
                       </label>
                     </div>
@@ -764,7 +784,7 @@ const DetailsPages = () => {
                 </div>
                 <div className={cx("vertical-divider")}></div>
                 <div className={cx("middle-bottom__right")}>
-                    <textarea cols={68} rows={8} />
+                  <textarea cols={68} rows={8} />
                 </div>
               </div>
             </div>
