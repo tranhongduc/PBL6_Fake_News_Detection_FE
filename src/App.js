@@ -27,6 +27,7 @@ const News = lazy(() => import("./pages/admin/scenes/News/News"));
 const ViewNews = lazy(() => import("./pages/admin/scenes/ViewNews/ViewNews"));
 const AdminPage = lazy(() => import("./pages/admin/admin"));
 const Admin = lazy(() => import("./pages/admin/scenes/Manage/Manage"));
+const ViewAdmin = lazy(() => import("./pages/admin/scenes/ViewAdmin/ViewAmin"));
 const ManageAccount = lazy(() => import("./pages/manageAccount/ManageAccount"))
 
 const App = () => {
@@ -219,6 +220,7 @@ const App = () => {
                 </Suspense>
               }
             />
+           
           </Route>
 
           {/* Unauthorized Page */}

@@ -101,12 +101,14 @@ export default function AuthUser() {
     const http = axios.create({
         baseURL: "http://127.0.0.1:8000/",
         headers: {
-            "Content-Type": 'multipart/form-data'
+            "Content-Type": 'multipart/form-data',
+            // "Authorization": `Bearer ${token}`,
         }
     })
 
     const setAuthorizationHeader = (token) => {
-        http.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const bearerToken = `Bearer ${token}`
+        http.defaults.headers.common["Authorization"] = bearerToken;
     }
 
     const updateProfile = (username) => {

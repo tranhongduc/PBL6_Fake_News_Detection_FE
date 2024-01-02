@@ -10,9 +10,11 @@ import { mockDataTeam } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useLocation } from "react-router-dom";
 import AuthUser from "../../../../utils/AuthUser";
+import Comment from "../../../../components/comment/Comment";
+import { format, parseISO } from "date-fns";
 
 const ViewUser = (params) => {
-  const { http } = AuthUser();
+  const { http, setAuthorizationHeader, accessToken } = AuthUser();
   const location = useLocation();
   const { state } = location;
   const theme = useTheme();
@@ -49,6 +51,66 @@ const ViewUser = (params) => {
     {
       field: "title",
       headerName: "Title",
+      flex: 1,
+    },
+    {
+      field: "category",
+      headerName: "Category",
+      flex: 0.25,
+    },
+    {
+      field: "created_at",
+      headerName: "Created day",
+      flex: 0.25,
+      valueGetter: (params) => {
+        const createdDate = new Date(params.row.created_at);
+        const day = createdDate.getDate();
+        const month = createdDate.getMonth();
+        const year = createdDate.getFullYear();
+        const time = day + "-" + month + "-" + year;
+        return time;
+      },
+    },
+    {
+      field: "label",
+      headerName: "Label",
+      renderCell: ({ row: { label } }) => {
+        return (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              width: "100%",
+            }}
+          >
+            {label === "real" ? (
+              <CheckIcon
+                style={{
+                  color: colors.greenAccent[300],
+                }}
+              />
+            ) : (
+              <ClearIcon
+                style={{
+                  color: colors.redAccent[300],
+                }}
+              />
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+  const commentsColumns = [
+    {
+      field: "ids",
+      headerName: "ID",
+    },
+    {
+      field: "title",
+      headerName: "Title",
       flex: 0.5,
     },
     {
@@ -69,33 +131,29 @@ const ViewUser = (params) => {
         return time;
       },
     },
-    {
-      field: "label",
-      headerName: "Label",
-      flex: 1,
-      renderCell: ({ row: { label } }) => {
-        if (label === "real") return <CheckIcon />;
-        else return <ClearIcon />;
-      },
-    },
   ];
 
   useEffect(() => {
-    const fetchData = async () => {
-      const id = state?.id;
-      await http
-        .get(`/auth/detail-user/${id}/`)
+    if (accessToken != null) {
+      setAuthorizationHeader(accessToken);
+    }
+
+    const fetchData = () => {
+      const id = state?.account_id;
+      http
+        .get(`/admin/detail-user/${id}/`)
         .then((resolve) => {
+          console.log(resolve);
           setViewUser(resolve.data);
         })
         .catch((error) => {
           console.log(error);
         });
-      await http
+      http
         .get(`/admin/coments_list_by_user/${id}/`)
         .then((resolve) => {
-          console.log("comment >>>", resolve);
-          const Comment_with_id = resolve.data.news.map((item, index) => ({
+          console.log("Comments:", resolve);
+          const Comment_with_id = resolve.data.comments.map((item, index) => ({
             ids: index + 1,
             ...item,
           }));
@@ -104,9 +162,10 @@ const ViewUser = (params) => {
         .catch((error) => {
           console.log(error);
         });
-      await http
+      http
         .get(`/admin/news_list_by_author/${id}/`)
         .then((resolve) => {
+          console.log("news:", resolve);
           const News_with_id = resolve.data.news.map((item, index) => ({
             ids: index + 1,
             ...item,
@@ -140,7 +199,9 @@ const ViewUser = (params) => {
         <div className="news-comment">
           <div className="new">
             <div className="title-text">New</div>
-            <div className="content-text">{viewUser?.news_count}</div>
+            <div className="content-text">
+              {viewUser?.news_count_fake + viewUser?.news_count_real}
+            </div>
             <div>
               <Box
                 m="40px 0 0 0"
@@ -176,7 +237,32 @@ const ViewUser = (params) => {
               </Box>{" "}
             </div>
           </div>
-          <Divider type="vertical" className="divide" />
+          <Divider className="divide" />
+          <div className="comment">
+            <div className="title-text">Comment</div>
+            <div className="content-text">{viewUser?.comments_count}</div>
+            <div className="Text">
+              <div className="Text__contain">
+                {comments.map((comment) => (
+                  <Comment
+                    commentId={comment?.id}
+                    avatar={comment?.avatar}
+                    comment={comment?.text}
+                    publishedDate={format(
+                      parseISO(comment.created_at),
+                      "MMM dd, yyyy"
+                    )}
+                    username={comment?.author}
+                    email={""}
+                    isEditAllowed={""}
+                    toggleReportModal={""}
+                  ></Comment>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* <Divider type="vertical" className="divide" />
+
           <div className="comment">
             <div className="title-text">Comment</div>
             <div className="content-text">{viewUser?.comments_count}</div>
@@ -208,12 +294,13 @@ const ViewUser = (params) => {
                   "& .MuiCheckbox-root": {
                     color: `${colors.greenAccent[200]} !important`,
                   },
+                  "& .MuiDataGrid-root": { fontSize: "1.5rem" },
                 }}
               >
-                <DataGrid rows={mockDataTeam} columns={columns} />
+                <DataGrid rows={comments} columns={commentsColumns} />
               </Box>{" "}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
