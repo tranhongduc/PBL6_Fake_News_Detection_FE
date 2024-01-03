@@ -1,21 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import styles from "./Reply.module.scss";
 import classNames from "classnames/bind";
-import { BsFlagFill } from "react-icons/bs";
-import { Button, Modal, Tooltip } from "antd";
-import { ref, getDownloadURL } from "firebase/storage"
-import { storage } from '../../utils/firebase'
+import { Modal, Tooltip } from "antd";
 import Draggable from "react-draggable";
-import { LazyLoadImage } from "react-lazy-load-image-component";
 import UserProfileModal from "../userProfileModal/UserProfileModal";
-import { FaPencilAlt, FaUser, FaShareAlt, FaBookmark, FaEdit } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { format, parseISO } from "date-fns";
 import AuthUser from "../../utils/AuthUser";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import TextEditor from "../textEditor/TextEditor";
 import { toast } from "react-toastify";
-import { BiSolidMessageRoundedDetail, BiSolidLike } from "react-icons/bi";
 import { MdDelete, MdReport } from "react-icons/md";
 import { AiFillLike } from "react-icons/ai";
 import { BsFillReplyFill } from "react-icons/bs";
@@ -36,9 +31,6 @@ const Reply = ({
 }) => {
 
   const { http, accessToken, userId, username, setAuthorizationHeader } = AuthUser()
-
-  // Create a reference from a Google Cloud Storage URI
-  const imageRef = ref(storage, accountAvatar);
 
   const [openModal, setOpenModal] = useState(false);
   const [isOnModePreview, setOnModePreview] = useState(false);
@@ -107,13 +99,39 @@ const Reply = ({
     ],
   };
 
+  const toggleCommentEditor = () => {
+    if (accessToken != null) {
+      setOpenCommentEditor(!isOpenCommentEditor);
+    } else {
+      // Lưu lại đường dẫn hiện tại
+      const currentPath = window.location.pathname;
+
+      Swal.fire({
+        title: "Not authorized yet",
+        text: "Please login first",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Login",
+        cancelButtonText: "Close",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', {
+            state: {
+              from: currentPath,
+            }
+          });
+        }
+      })
+    }
+  }
+
   const handlePreviewEditComment = () => {
     if (content.trim() !== "") {
       setContentError(false)
     }
 
     if (isOnModePreviewEdit) {
-      const previewWrapper = document.querySelector('.Comment_preview-reply__wEGWO');
+      const previewWrapper = document.querySelector('.Reply_preview-reply__03xZM');
 
       // Thêm lớp close ngay khi đóng modal
       previewWrapper.classList.add(styles.closepreview);
@@ -138,6 +156,8 @@ const Reply = ({
       if (accessToken != null) {
         setAuthorizationHeader(accessToken);
       }
+
+      console.log('comment id:', commentId)
 
       http.put(`user/comment/update/${commentId}/`, formData)
         .then(() => {
@@ -164,102 +184,6 @@ const Reply = ({
         });
     }
   };
-
-  const onChangeContent = (value) => {
-    setContent(value);
-    console.log("Comment:", value);
-  };
-
-  // --------------------------     Handle Reply     --------------------------
-  const handleOpenReply = () => {
-    if (accessToken === null) {
-      // Lưu lại đường dẫn hiện tại
-      const currentPath = window.location.pathname;
-
-      Swal.fire({
-        title: 'Not authorized yet',
-        text: 'Please login to post reply',
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'Login',
-        cancelButtonText: 'Close',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate('/login', {
-            state: {
-              from: currentPath,
-            }
-          });
-        }
-      })
-    }
-  }
-
-  const handlePostReply = () => {
-    if (!reply.trim()) {
-      setRelpyError(true);
-    } else {
-      setRelpyError(false);
-
-      const formData = new FormData();
-      formData.append('text', reply);
-      formData.append('news', newsId);
-
-      if (accessToken != null) {
-        setAuthorizationHeader(accessToken);
-      }
-
-      http.post(`user/comment/store/`, formData)
-        .then(() => {
-          Swal.fire(
-            'Ta~Da~',
-            'You\'ve post your reply successfully',
-            'success'
-          ).then(() => {
-            navigate(0);
-          })
-        })
-        .catch((reject) => {
-          console.log(reject);
-          toast.error('Oops. Try again', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          })
-        })
-    }
-  }
-
-  const toggleCommentEditor = () => {
-    if (accessToken != null) {
-      setOpenCommentEditor(!isOpenCommentEditor);
-    } else {
-      // Lưu lại đường dẫn hiện tại
-      const currentPath = window.location.pathname;
-
-      Swal.fire({
-        title: "Not authorized yet",
-        text: "Please login first",
-        icon: "info",
-        showCancelButton: true,
-        confirmButtonText: "Login",
-        cancelButtonText: "Close",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate('/login', {
-            state: {
-              from: currentPath,
-            }
-          });
-        }
-      })
-    }
-  }
 
   const handleDeleteComment = () => {
     Swal.fire({
@@ -301,6 +225,36 @@ const Reply = ({
     })
   }
 
+  const onChangeContent = (value) => {
+    setContent(value);
+    console.log("Comment:", value);
+  };
+
+  // --------------------------     Handle Reply     --------------------------
+  const handleOpenReply = () => {
+    if (accessToken === null) {
+      // Lưu lại đường dẫn hiện tại
+      const currentPath = window.location.pathname;
+
+      Swal.fire({
+        title: 'Not authorized yet',
+        text: 'Please login to post reply',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Close',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', {
+            state: {
+              from: currentPath,
+            }
+          });
+        }
+      })
+    }
+  }
+
   const handlePreviewReply = () => {
     if (reply.trim() !== "") {
       setRelpyError(false)
@@ -317,6 +271,46 @@ const Reply = ({
       }, 400)
     } else {
       setOnModePreview(true);
+    }
+  }
+
+  const handlePostReply = () => {
+    if (!reply.trim()) {
+      setRelpyError(true);
+    } else {
+      setRelpyError(false);
+
+      const formData = new FormData();
+      formData.append('text', reply);
+      formData.append('news', newsId);
+
+      if (accessToken != null) {
+        setAuthorizationHeader(accessToken);
+      }
+
+      http.post(`user/comment/store/`, formData)
+        .then(() => {
+          Swal.fire(
+            'Ta~Da~',
+            'You\'ve post your reply successfully',
+            'success'
+          ).then(() => {
+            navigate(0);
+          })
+        })
+        .catch((reject) => {
+          console.log(reject);
+          toast.error('Oops. Try again', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          })
+        })
     }
   }
 
@@ -432,8 +426,6 @@ const Reply = ({
         <div className={cx("reply-wrapper__bottom")}>
           {(() => {
             if (accessToken !== null) {
-              console.log('User ID:', userId)
-              console.log('Author ID:', authorId)
               if (userId !== authorId) {
                 return (
                   <div onClick={toggleReportModal} className={cx("right-bottom__left")}>

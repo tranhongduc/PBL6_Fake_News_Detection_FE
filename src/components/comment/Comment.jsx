@@ -525,10 +525,11 @@ const Comment = ({
                 {isOpenListReplies && (
                   <div className={cx("view-reply-container")}>
                     {listSubComment.map((subComment) => {
+                      console.log('Sub comment:', subComment )
                       return (
                         <Reply
                           newsId={newsId}
-                          commentId={commentId}
+                          commentId={subComment.id}
                           authorId={subComment.author_id}
                           accountAvatar={subComment.avatar_url}
                           comment={subComment.text}
