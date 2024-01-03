@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import styles from "./Comment.module.scss";
 import classNames from "classnames/bind";
-import { BsFlagFill } from "react-icons/bs";
 import { Button, Modal, Tooltip } from "antd";
-import { ref, getDownloadURL } from "firebase/storage"
-import { storage } from '../../utils/firebase'
 import Draggable from "react-draggable";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import UserProfileModal from "../userProfileModal/UserProfileModal";
-import { FaPencilAlt, FaUser, FaShareAlt, FaBookmark } from "react-icons/fa";
+import { FaEdit, FaUser, FaShareAlt, FaBookmark } from "react-icons/fa";
 import { format, parseISO } from "date-fns";
 import AuthUser from "../../utils/AuthUser";
 import Swal from "sweetalert2";
@@ -20,38 +17,38 @@ import { MdReport } from "react-icons/md";
 import { AiFillLike } from "react-icons/ai";
 import { BsFillReplyFill } from "react-icons/bs";
 import { FaEye } from "react-icons/fa";
+import Reply from "../reply/Reply";
+import { ImReply } from "react-icons/im";
 
 const cx = classNames.bind(styles);
 
 const Comment = ({ 
+  numericalOrder,
   newsId, 
+  authorId,
   commentId, 
   accountAvatar, 
   joinDate, 
-  commentCount, 
-  totalLike, 
   comment, 
+  listSubComment,
+  subCommentCount,
   publishedDate, 
   accountUsername, 
   email, 
+  commentCount, 
+  totalLike, 
   isEditAllowed, 
   toggleReportModal, 
   isOpenReply, 
   setOpenReply, 
 }) => {
 
-  const { http, accessToken, avatar, username, setAuthorizationHeader } = AuthUser()
-
-  // Fetch image state
-  const [avatarUrl, setAvatarUrl] = useState(null);
-
-  // Create a reference from a Google Cloud Storage URI
-  const imageRef = ref(storage, accountAvatar);
+  const { http, accessToken, avatar, userId, username, setAuthorizationHeader } = AuthUser()
 
   const [openModal, setOpenModal] = useState(false);
   const [isModalEditCommentOpen, setIsModalEditCommentOpen] = useState(false)
-  const [reply, setReply] = useState('')
   const [isOnModePreview, setOnModePreview] = useState(false);
+  const [isOpenListReplies, setOpenListReplies] = useState([])
 
   const navigate = useNavigate();
 
@@ -93,6 +90,8 @@ const Comment = ({
   // --------------------------     Handle Comment     --------------------------
   const [content, setContent] = useState(comment);
   const [contentError, setContentError] = useState(false);
+  const [reply, setReply] = useState('')
+  const [replyError, setRelpyError] = useState(false);
 
   const editCommentModule = {
     toolbar: [
@@ -155,7 +154,7 @@ const Comment = ({
       http.put(`user/comment/update/${commentId}/`, formData)
         .then(() => {
           Swal.fire(
-            "Ta~Da~",
+            "Great",
             "You've update your comment successfully",
             "success"
           ).then(() => {
@@ -187,26 +186,67 @@ const Comment = ({
     console.log("Comment:", value);
   };
 
-  // --------------------------     Handle Comment     --------------------------
-  const handleAuthorized = () => {
-    // Lưu lại đường dẫn hiện tại
-    const currentPath = window.location.pathname;
+  // --------------------------     Handle Reply     --------------------------
+  const handleOpenReply = () => {
+    if (accessToken === null) {
+      // Lưu lại đường dẫn hiện tại
+      const currentPath = window.location.pathname;
 
-    navigate('/login', {
-      state: {
-        from: currentPath,
+      Swal.fire({
+        title: 'Not authorized yet',
+        text: 'Please login to post reply',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Close',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', { 
+            state: { 
+              from: currentPath,
+            } 
+          });
+        } 
+      })
+    } else {
+      if (isOpenReply) {
+        const replyWrapper = document.querySelector('.Comment_comment-reply__JpPso');
+  
+        // Thêm lớp close ngay khi đóng modal
+        replyWrapper.classList.add(styles.closereply);
+  
+        setTimeout(() => {
+          setOpenReply(false);
+        }, 400)
+      } else {
+        setOpenReply(true);
       }
-    });
+    }
+  }
+
+  const handleViewReplies = () => {
+    // if (isOpenReply) {
+    //   const replyWrapper = document.querySelector('.Comment_comment-reply__JpPso');
+
+    //   // Thêm lớp close ngay khi đóng modal
+    //   replyWrapper.classList.add(styles.closereply);
+
+    //   setTimeout(() => {
+    //     setOpenReply(false);
+    //   }, 400)
+    // } else {
+    //   setOpenReply(true);
+    // }
   }
 
   const handlePostReply = () => {
-    if (!comment.trim()) {
-      setContentError(true);
+    if (!reply.trim()) {
+      setRelpyError(true);
     } else {
-      setContentError(false);
+      setRelpyError(false);
 
       const formData = new FormData();
-      formData.append('text', comment);
+      formData.append('text', reply);
       formData.append('news', newsId);
 
       if (accessToken != null) {
@@ -216,8 +256,8 @@ const Comment = ({
       http.post(`user/comment/store/`, formData)
         .then(() => {
           Swal.fire(
-            'Ta~Da~',
-            'You\'ve post your comment successfully',
+            'Great',
+            'You\'ve post your reply successfully',
             'success'
           ).then(() => {
             navigate(0);
@@ -239,24 +279,9 @@ const Comment = ({
     }
   }
 
-  const handleReply = () => {
-    if (isOpenReply) {
-      const replyWrapper = document.querySelector('.Comment_comment-reply__JpPso');
-
-      // Thêm lớp close ngay khi đóng modal
-      replyWrapper.classList.add(styles.closereply);
-
-      setTimeout(() => {
-        setOpenReply(false);
-      }, 400)
-    } else {
-      setOpenReply(true);
-    }
-  }
-
   const handlePreviewReply = () => {
     if (reply.trim() !== "") {
-      setContentError(false)
+      setRelpyError(false)
     }
 
     if (isOnModePreview) {
@@ -276,6 +301,33 @@ const Comment = ({
   const onChangeReply = (value) => {
     setReply(value)
     console.log('Reply:', value)
+  }
+
+  // --------------------------     Handle Like Comment     --------------------------
+  const handleLikeComment = () => {
+    if (accessToken === null) {
+      // Lưu lại đường dẫn hiện tại
+      const currentPath = window.location.pathname;
+
+      Swal.fire({
+        title: 'Not authorized yet',
+        text: 'Please login to leave a like',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Close',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', { 
+            state: { 
+              from: currentPath,
+            } 
+          });
+        } 
+      })
+    } else {
+
+    }
   }
 
   // ---------------------------      Modal Draggable      ---------------------------
@@ -302,34 +354,17 @@ const Comment = ({
     });
   };
 
-  useEffect(() => {
-    const fetchAvatar = () => {
-      if (avatar != "") {
-        getDownloadURL(imageRef)
-          .then((resolve) => {
-            setAvatarUrl(resolve);
-          })
-          .catch((reject) => {
-            console.log(reject);
-          });
-      }
-    };
-
-    fetchAvatar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className={cx("comment-container")}>
       <div className={cx("comment-wrapper")}>
         <div className={cx("comment-wrapper__left")}>
           <div className={cx("left-top")}>
             <LazyLoadImage
-              key={avatarUrl}
-              src={avatarUrl}
-              alt={`${avatarUrl}`}
+              key={accountAvatar}
+              src={accountAvatar}
+              alt={`${accountAvatar}`}
               effect="blur"
-              placeholderSrc={avatarUrl}
+              placeholderSrc={accountAvatar}
             />
             <p onClick={handleClickUsername} className={cx("comment-username")}>{accountUsername}</p>
           </div>
@@ -365,21 +400,56 @@ const Comment = ({
             <div className={cx("comment-interact")}>
               <FaShareAlt className={cx("comment-interact__share")} />
               <FaBookmark className={cx("comment-interact__bookmark")} />
-              <p onClick={handleClickUsername} className={cx("comment-interact__number")}>{accountUsername}</p>
+              <p className={cx("comment-interact__number")}>{`#${numericalOrder}`}</p>
             </div>
           </div>
-          <div className={cx("right-middle")} dangerouslySetInnerHTML={{ __html: comment }} />
+          <div className={cx("right-middle")}>
+            <div className={cx("comment-content")} dangerouslySetInnerHTML={{ __html: comment }} />
+            {(subCommentCount > 0) ? (
+              <>
+                <div onClick={handleViewReplies} className={cx("view-replies")}>
+                  <ImReply className={cx("icon-reply")} />
+                  <p>{subCommentCount == 1 ? `${subCommentCount} Reply` : `${subCommentCount} Replies`}</p>
+                </div>
+                <div className={cx("view-reply-container")}>
+                  {listSubComment.map((subComment, index) => {
+                    return (
+                      <Reply
+                        newsId={newsId}
+                        commentId={commentId}
+                        accountAvatar={subComment.avatar}
+                        comment={subComment.text}
+                        accountUsername={subComment.author}
+                        joinDate={subComment.join_date}
+                        publishedDate={subComment.created_at}
+                        toggleReportModal={toggleReportModal}
+                      />
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
           <div className={cx("right-bottom")}>
-            <div onClick={toggleReportModal} className={cx("right-bottom__left")}>
-              <MdReport className={cx("report-icon")} />
-              <p className={cx("report-text")}>Report</p>
-            </div>
+            {(userId !== authorId) ? (
+              <div onClick={toggleReportModal} className={cx("right-bottom__left")}>
+                <MdReport className={cx("report-icon")} />
+                <p className={cx("report-text")}>Report</p>
+              </div>
+            ) : (
+              <div className={cx("right-bottom__left")}>
+                <FaEdit className={cx("edit-icon")} />
+                <p className={cx("edit-text")}>Edit Comment</p>
+              </div>
+            )}
             <div className={cx("right-bottom__right")}>
-              <div className={cx("bottom-right__like")}>
+              <div onClick={handleLikeComment} className={cx("bottom-right__like")}>
                 <AiFillLike />
                 <p className={cx("like-text")}>Like</p>
               </div>
-              <div onClick={handleReply} className={cx("bottom-right__reply")}>
+              <div onClick={handleOpenReply} className={cx("bottom-right__reply")}>
                 <BsFillReplyFill />
                 <p className={cx("reply-text")}>Reply</p>
               </div>
@@ -402,9 +472,9 @@ const Comment = ({
                 placeholder={"Write your reply"}
                 onChange={onChangeReply}
               />
-              {contentError && (
+              {replyError && (
                 <div className={cx("error-message")}>
-                  <p>Content is required</p>
+                  <p>Reply content is required</p>
                 </div>
               )}
             </div>
@@ -436,7 +506,7 @@ const Comment = ({
       <Modal
         title={
           <UserProfileModal
-            avatar={avatarUrl}
+            avatar={accountAvatar}
             username={username}
             email={email}
           />
