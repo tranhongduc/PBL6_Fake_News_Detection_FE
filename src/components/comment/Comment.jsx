@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import styles from "./Comment.module.scss";
 import classNames from "classnames/bind";
-import { Button, Modal, Tooltip } from "antd";
+import { Modal, Tooltip } from "antd";
 import Draggable from "react-draggable";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import UserProfileModal from "../userProfileModal/UserProfileModal";
@@ -529,7 +529,8 @@ const Comment = ({
                         <Reply
                           newsId={newsId}
                           commentId={commentId}
-                          accountAvatar={subComment.avatar}
+                          authorId={subComment.author_id}
+                          accountAvatar={subComment.avatar_url}
                           comment={subComment.text}
                           accountUsername={subComment.author}
                           joinDate={subComment.join_date}

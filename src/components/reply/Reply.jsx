@@ -8,7 +8,7 @@ import { storage } from '../../utils/firebase'
 import Draggable from "react-draggable";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import UserProfileModal from "../userProfileModal/UserProfileModal";
-import { FaPencilAlt, FaUser, FaShareAlt, FaBookmark } from "react-icons/fa";
+import { FaPencilAlt, FaUser, FaShareAlt, FaBookmark, FaEdit } from "react-icons/fa";
 import { format, parseISO } from "date-fns";
 import AuthUser from "../../utils/AuthUser";
 import Swal from "sweetalert2";
@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import TextEditor from "../textEditor/TextEditor";
 import { toast } from "react-toastify";
 import { BiSolidMessageRoundedDetail, BiSolidLike } from "react-icons/bi";
-import { MdReport } from "react-icons/md";
+import { MdDelete, MdReport } from "react-icons/md";
 import { AiFillLike } from "react-icons/ai";
 import { BsFillReplyFill } from "react-icons/bs";
 import { FaEye } from "react-icons/fa";
@@ -26,6 +26,7 @@ const cx = classNames.bind(styles);
 const Reply = ({
   newsId,
   commentId,
+  authorId,
   accountAvatar,
   comment,
   accountUsername,
@@ -34,18 +35,16 @@ const Reply = ({
   toggleReportModal,
 }) => {
 
-  const { http, accessToken, avatar, username, setAuthorizationHeader } = AuthUser()
-
-  // Fetch image state
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  const { http, accessToken, userId, username, setAuthorizationHeader } = AuthUser()
 
   // Create a reference from a Google Cloud Storage URI
   const imageRef = ref(storage, accountAvatar);
 
   const [openModal, setOpenModal] = useState(false);
-  const [isModalEditCommentOpen, setIsModalEditCommentOpen] = useState(false)
   const [isOnModePreview, setOnModePreview] = useState(false);
+  const [isOnModePreviewEdit, setOnModePreviewEdit] = useState(false);
   const [listAccountInfo, setListAccountInfo] = useState([])
+  const [isOpenCommentEditor, setOpenCommentEditor] = useState(false)
 
   const navigate = useNavigate();
 
@@ -108,6 +107,25 @@ const Reply = ({
     ],
   };
 
+  const handlePreviewEditComment = () => {
+    if (content.trim() !== "") {
+      setContentError(false)
+    }
+
+    if (isOnModePreviewEdit) {
+      const previewWrapper = document.querySelector('.Comment_preview-reply__wEGWO');
+
+      // Thêm lớp close ngay khi đóng modal
+      previewWrapper.classList.add(styles.closepreview);
+
+      setTimeout(() => {
+        setOnModePreviewEdit(false);
+      }, 400)
+    } else {
+      setOnModePreviewEdit(true);
+    }
+  };
+
   const handleEditComment = () => {
     if (!content.trim()) {
       setContentError(true);
@@ -145,10 +163,6 @@ const Reply = ({
           });
         });
     }
-  };
-
-  const handleCloseModalEditComment = () => {
-    setIsModalEditCommentOpen(false);
   };
 
   const onChangeContent = (value) => {
@@ -219,6 +233,72 @@ const Reply = ({
           })
         })
     }
+  }
+
+  const toggleCommentEditor = () => {
+    if (accessToken != null) {
+      setOpenCommentEditor(!isOpenCommentEditor);
+    } else {
+      // Lưu lại đường dẫn hiện tại
+      const currentPath = window.location.pathname;
+
+      Swal.fire({
+        title: "Not authorized yet",
+        text: "Please login first",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Login",
+        cancelButtonText: "Close",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', {
+            state: {
+              from: currentPath,
+            }
+          });
+        }
+      })
+    }
+  }
+
+  const handleDeleteComment = () => {
+    Swal.fire({
+      title: "HOLD UP!",
+      html: "Are you sure you want to delete this comment?<br>After deleting, you can't recover anymore!",
+      icon: "error",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      focusCancel: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setAuthorizationHeader(accessToken)
+
+        http.delete(`admin/comment/delete/${commentId}/`)
+          .then(() => {
+            Swal.fire(
+              "Done",
+              "You've deleted your comment successfully",
+              "success"
+            ).then(() => {
+              navigate(0);
+            });
+          })
+          .catch((reject) => {
+            console.log(reject);
+            toast.error("Oops. Try again", {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
+          });
+      }
+    })
   }
 
   const handlePreviewReply = () => {
@@ -296,53 +376,12 @@ const Reply = ({
     });
   };
 
-  useEffect(() => {
-    const fetchAvatar = () => {
-      if (accountAvatar != "") {
-        getDownloadURL(imageRef)
-          .then((resolve) => {
-            setAvatarUrl(resolve);
-          })
-          .catch((reject) => {
-            console.log(reject);
-          });
-      }
-    };
-
-    fetchAvatar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // --------------------------     Fetch API     --------------------------
-  useEffect(() => {
-    const fetchAvatar = () => {
-      if (accountAvatar != "") {
-        getDownloadURL(imageRef)
-          .then((resolve) => {
-            setAvatarUrl(resolve);
-          })
-          .catch((reject) => {
-            console.log(reject);
-          });
-      }
-    };
-
-    fetchAvatar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className={cx("reply-container")}>
       <div className={cx("reply-wrapper")}>
         <div className={cx("reply-wrapper__top")}>
           <div className={cx("top-left")}>
-            <LazyLoadImage
-              key={avatarUrl}
-              src={avatarUrl}
-              alt={`${avatarUrl}`}
-              effect="blur"
-              placeholderSrc={avatarUrl}
-            />
+            <img src={accountAvatar} alt={`${accountAvatar}`} />
           </div>
           <div className={cx("top-right")}>
             <div className={cx("top-right__username")}>
@@ -356,13 +395,75 @@ const Reply = ({
           </div>
         </div>
         <div className={cx("reply-wrapper__middle")}>
-          <div className={cx("reply-content")} dangerouslySetInnerHTML={{ __html: comment }} />
+          {isOpenCommentEditor ? (
+            <div className={cx("reply-edit")}>
+              <TextEditor
+                modules={editCommentModule}
+                value={content}
+                placeholder={"Edit your comment"}
+                onChange={onChangeContent}
+              />
+              {contentError && (
+                <div className={cx("error-message")}>
+                  <p>Content is required</p>
+                </div>
+              )}
+              {isOnModePreviewEdit && (
+                <div className={cx("preview-reply")}>
+                  <p>Preview</p>
+                  <div className={cx("preview-content")} dangerouslySetInnerHTML={{ __html: content }} />
+                </div>
+              )}
+              <div className={cx("reply-edit__bottom")}>
+                <button className={cx("btn-edit")} onClick={handleEditComment}>
+                  <FaEdit size={16} />
+                  <p>CONFIRM</p>
+                </button>
+                <button className={cx("btn-preview")} onClick={handlePreviewEditComment}>
+                  <FaEye size={16} />
+                  <p>PREVIEW</p>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className={cx("reply-content")} dangerouslySetInnerHTML={{ __html: comment }} />
+          )}
         </div>
         <div className={cx("reply-wrapper__bottom")}>
-          <div onClick={toggleReportModal} className={cx("right-bottom__left")}>
-            <MdReport className={cx("report-icon")} />
-            <p className={cx("report-text")}>Report</p>
-          </div>
+          {(() => {
+            if (accessToken !== null) {
+              console.log('User ID:', userId)
+              console.log('Author ID:', authorId)
+              if (userId !== authorId) {
+                return (
+                  <div onClick={toggleReportModal} className={cx("right-bottom__left")}>
+                    <MdReport className={cx("report-icon")} />
+                    <p className={cx("report-text")}>Report</p>
+                  </div>
+                )
+              } else {
+                return (
+                  <div className={cx("right-bottom__left")}>
+                    <div onClick={toggleCommentEditor} className={cx("left-edit")}>
+                      <FaEdit className={cx("edit-icon")} />
+                      <p className={cx("edit-text")}>{isOpenCommentEditor ? 'Close Edit' : 'Edit Comment'}</p>
+                    </div>
+                    <div onClick={handleDeleteComment} className={cx("left-delete")}>
+                      <MdDelete size={18} className={cx("delete-icon")} />
+                      <p className={cx("delete-text")}>Delete Comment</p>
+                    </div>
+                  </div>
+                )
+              }
+            } else {
+              return (
+                <div onClick={toggleReportModal} className={cx("right-bottom__left")}>
+                  <MdReport className={cx("report-icon")} />
+                  <p className={cx("report-text")}>Report</p>
+                </div>
+              )
+            }
+          })()}
           <div className={cx("right-bottom__right")}>
             <div onClick={handleLikeComment} className={cx("bottom-right__like")}>
               <AiFillLike />
@@ -375,12 +476,11 @@ const Reply = ({
           </div>
         </div>
       </div>
-
       {/* User Profile */}
       <Modal
         title={
           <UserProfileModal
-            avatar={avatarUrl}
+            avatar={accountAvatar}
             username={username}
           // email={email}
           />

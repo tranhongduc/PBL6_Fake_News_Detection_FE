@@ -388,6 +388,32 @@ const DetailsPages = () => {
       }
     });
   }
+
+  const toggleReportModal = () => {
+    if (accessToken != null) {
+      setOpenReportModal(!isReportModalOpen);
+    } else {
+      // Lưu lại đường dẫn hiện tại
+      const currentPath = window.location.pathname;
+
+      Swal.fire({
+        title: "Not authorized yet",
+        text: "Please login first",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Login",
+        cancelButtonText: "Close",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', {
+            state: {
+              from: currentPath,
+            }
+          });
+        }
+      })
+    }
+  }
   
   const handlePostComment = () => {
     if (!comment.trim()) {
@@ -505,8 +531,15 @@ const DetailsPages = () => {
           const commentsWithAvatarUrls = await Promise.all(
             listComments.map(async (comment) => {
               const avatarUrl = await getFirebaseImageURL(comment.avatar);
+
+              const subCommentsWithAvatarUrls = await Promise.all(
+                comment.sub_comment.map(async (subComment) => {
+                  const subCommentAvatarUrl = await getFirebaseImageURL(subComment.avatar);
+                  return { ...subComment, avatar_url: subCommentAvatarUrl };
+                })
+              );
               
-              return { ...comment, avatarUrl };
+              return { ...comment, avatar_url: avatarUrl, sub_comment: subCommentsWithAvatarUrls };
             })
           );
 
@@ -702,7 +735,7 @@ const DetailsPages = () => {
                       newsId={id}
                       authorId={comment.author_id}
                       commentId={comment.id}
-                      accountAvatar={comment.avatarUrl}
+                      accountAvatar={comment.avatar_url}
                       joinDate={comment.join_date}
                       comment={comment.text}
                       listSubComment={comment.sub_comment}
@@ -712,7 +745,7 @@ const DetailsPages = () => {
                       email={comment.email}
                       commentCount={accountInfo ? accountInfo.comment_counts : 0}
                       totalLike={accountInfo ? accountInfo.like_counts : 0}
-                      toggleReportModal={() => setOpenReportModal(!isReportModalOpen)}
+                      toggleReportModal={toggleReportModal}
                       isOpenReply={openReplies[index] || false}
                       setOpenReply={(value) => {
                         const newOpenReplies = [...openReplies];
