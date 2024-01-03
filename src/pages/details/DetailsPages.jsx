@@ -44,7 +44,6 @@ const DetailsPages = () => {
   const [isOnModeEditBlog, setOnModeEditBlog] = useState(false)
   const [isOnModePreview, setOnModePreview] = useState(false);
   const [openReplies, setOpenReplies] = useState([]);
-  // const [isModalCreateCommentOpen, setIsModalCreateCommentOpen] = useState(false)
   const [isReportModalOpen, setOpenReportModal] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -127,6 +126,21 @@ const DetailsPages = () => {
       console.error('Error getting image URL', error);
       return null;
     }
+  };
+
+  // Hàm để tạo một bản sao mới của listComments với trường avatarUrl được thêm vào
+  const addAvatarUrlsToComments = async (comments) => {
+    const commentsWithAvatars = await Promise.all(
+      comments.map(async (comment) => {
+        // Lấy đường dẫn ảnh từ Firebase
+        const avatarUrl = await getFirebaseImageURL(comment.avatar);
+        
+        // Trả về một bản sao mới của comment với trường avatarUrl được thêm vào
+        return { ...comment, avatarUrl };
+      })
+    );
+
+    return commentsWithAvatars;
   };
 
   // Pagination state
@@ -392,8 +406,8 @@ const DetailsPages = () => {
       http.post(`user/comment/store/`, formData)
         .then(() => {
           Swal.fire(
-            'Ta~Da~',
-            'You\'ve create your comment successfully',
+            'Great',
+            'You\'ve post your comment successfully',
             'success'
           ).then(() => {
             navigate(0);
@@ -445,7 +459,7 @@ const DetailsPages = () => {
     const fetchData = () => {
       http.get('admin/categories_list')
         .then((resolve) => {
-          console.log('Response Data:', resolve.data)
+          console.log('List Categories:', resolve.data)
           setListCategories(resolve.data.categories)
         })
         .catch((reject) => {
@@ -469,7 +483,6 @@ const DetailsPages = () => {
         newsDetail.imageUrl = imageUrl;
 
         setNewsDetail(newsDetail);
-        setTotalComments(newsDetail.comments_count)
       } catch (error) {
         console.log('Error:', error)
       }
@@ -480,18 +493,34 @@ const DetailsPages = () => {
   }, [id])
 
   useEffect(() => {
-    const fetchData = () => {
-      http.get(`admin/comments_list_by_news/${id}/${currentPage}`)
-        .then((resolve) => {
-          console.log('List Comments:', resolve.data)
-          const listComments = resolve.data.comments
-          const listAccountInfo = resolve.data.account_info_list
-          setListComments(listComments);
-          setListAccountInfo(listAccountInfo)
-        })
-        .catch((reject) => {
-          console.log('Error:', reject);
-        });
+    const fetchData = async () => {
+      try {
+        const response = await http.get(`admin/comments_list_by_news/${id}/${currentPage}/${pageSize}`)
+        console.log('List Comments:', response.data)
+      
+        const totalComments = response.data.account_info_list.length
+        const listComments = response.data.comments
+
+        if (totalComments > 0) {
+          const commentsWithAvatarUrls = await Promise.all(
+            listComments.map(async (comment) => {
+              const avatarUrl = await getFirebaseImageURL(comment.avatar);
+              
+              return { ...comment, avatarUrl };
+            })
+          );
+
+          console.log('New List Comments:', commentsWithAvatarUrls)
+          setListComments(commentsWithAvatarUrls);
+        }
+        setTotalComments(totalComments)
+
+        const listAccountInfo = response.data.account_info_list
+        setListAccountInfo(listAccountInfo)
+
+      } catch (error) {
+        console.log('Error:', error)
+      }
     };
 
     fetchData();
@@ -669,16 +698,20 @@ const DetailsPages = () => {
 
                   return (
                     <Comment
+                      numericalOrder={(currentPage - 1) * pageSize + index + 1}
                       newsId={id}
+                      authorId={comment.author_id}
                       commentId={comment.id}
-                      accountAvatar={comment.avatar}
-                      comment={comment.text}
+                      accountAvatar={comment.avatarUrl}
                       joinDate={comment.join_date}
-                      commentCount={accountInfo ? accountInfo.comment_counts : 0}
-                      totalLike={accountInfo ? accountInfo.like_counts : 0}
+                      comment={comment.text}
+                      listSubComment={comment.sub_comment}
+                      subCommentCount={comment.sub_comment_count}
                       publishedDate={comment.created_at}
                       accountUsername={comment.author}
                       email={comment.email}
+                      commentCount={accountInfo ? accountInfo.comment_counts : 0}
+                      totalLike={accountInfo ? accountInfo.like_counts : 0}
                       isEditAllowed={comment.author === username ? true : false}
                       toggleReportModal={() => setOpenReportModal(!isReportModalOpen)}
                       isOpenReply={openReplies[index] || false}
@@ -846,46 +879,6 @@ const DetailsPages = () => {
           <h2 style={{ textAlign: 'center' }}>Confirm delete this blog?</h2>
         </div>
       </Modal>
-      {/* Create Comment
-      <Modal
-        title="Create Comment"
-        open={isModalCreateCommentOpen}
-        onOk={handleCreateComment}
-        onCancel={handleCloseModalCreateComment}
-        footer={[
-          <>
-            <Button
-              type="primary"
-              key="create"
-              onClick={handleCreateComment}
-            >
-              Create
-            </Button>
-            <Button
-              type="primary"
-              className={cx("btn-cancel-delete")}
-              key="back"
-              onClick={handleCloseModalCreateComment}
-            >
-              Cancel
-            </Button>
-          </>
-        ]}
-      >
-        <div className={cx("modal-wrapper")}>
-          <TextEditor
-            modules={createCommentModule}
-            value={comment}
-            placeholder={"Write your comment"}
-            onChange={onChangeComment}
-          />
-          {contentError && (
-            <div className={cx("error-message")}>
-              Content is required
-            </div>
-          )}
-        </div>
-      </Modal> */}
       <Footer />
     </div>
   )
