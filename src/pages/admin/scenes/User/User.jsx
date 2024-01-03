@@ -1,15 +1,13 @@
 import "./User.css";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, useTheme, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataTeam } from "../../data/mockData";
-import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
-import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import Header from "../../components/Header";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthUser from "../../../../utils/AuthUser";
+import ClearIcon from "@mui/icons-material/Clear";
+import CheckIcon from "@mui/icons-material/Check";
 
 const User = () => {
   const { http } = AuthUser();
@@ -18,24 +16,73 @@ const User = () => {
   const [user, setUser] = useState([]);
   const colors = tokens(theme.palette.mode);
   const columns = [
-    {
-      field: "id",
-      headerName: "ID",
-    },
+    { field: "id", headerName: "ID" },
     {
       field: "username",
       headerName: "User Name",
       flex: 1,
-      cellClassName: "name-column--cell",
     },
     {
       field: "email",
       headerName: "Email",
+      flex: 1,
     },
+
     {
       field: "status",
       headerName: "Status",
-      flex: 1,
+      width: 200,
+      renderCell: (params) => {
+        const { status } = params.row;
+
+        const handleEditClick = () => {
+          if (status === "active") {
+            // Thực hiện hành động khi status là "active"
+            console.log("Change to inactive");
+          } else {
+            // Thực hiện hành động khi status không phải là "active"
+            console.log("Change to active");
+          }
+        };
+
+        return (
+          <Box display="flex" borderRadius="4px">
+            {status === "active" ? (
+              <Button
+                style={{
+                  color: colors.greenAccent[300],
+                }}
+                startIcon={
+                  <CheckIcon
+                    style={{
+                      color: colors.greenAccent[300],
+                    }}
+                  />
+                }
+                onClick={handleEditClick}
+              >
+                Change Status
+              </Button>
+            ) : (
+              <Button
+                style={{
+                  color: colors.redAccent[300],
+                }}
+                startIcon={
+                  <ClearIcon
+                    style={{
+                      color: colors.redAccent[300],
+                    }}
+                  />
+                }
+                onClick={handleEditClick}
+              >
+                Change Status
+              </Button>
+            )}
+          </Box>
+        );
+      },
     },
   ];
 
@@ -50,7 +97,7 @@ const User = () => {
   useEffect(() => {
     const fetchData = async () => {
       await http
-        .get(`/auth/list-user/`)
+        .get(`/admin/list-user/`)
         .then((resolve) => {
           const dataWithIds = resolve.data.users.map((item, index) => ({
             id: index + 1,

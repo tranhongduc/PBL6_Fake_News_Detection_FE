@@ -53,21 +53,21 @@ const Comment = ({
   const [reply, setReply] = useState('')
   const [isOnModePreview, setOnModePreview] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  // Handle click out boundary of modal 
+  // Handle click out boundary of modal
   const handleOk = () => {
     setOpenModal(false);
-  }
+  };
 
   // Handle click button "X" of modal
   const handleCancel = () => {
     setOpenModal(false);
-  }
+  };
 
   const handleClickUsername = () => {
-    setOpenModal(true)
-  }
+    setOpenModal(true);
+  };
 
   const createReplyModule = {
     toolbar: [
@@ -91,42 +91,42 @@ const Comment = ({
   }
 
   // --------------------------     Handle Comment     --------------------------
-  const [content, setContent] = useState(comment)
+  const [content, setContent] = useState(comment);
   const [contentError, setContentError] = useState(false);
 
   const editCommentModule = {
     toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
-      ['blockquote', 'code-block'],
+      ["bold", "italic", "underline", "strike"], // toggled buttons
+      ["blockquote", "code-block"],
 
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
-      [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ script: "sub" }, { script: "super" }], // superscript/subscript
+      [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
 
-      [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
 
-      [{ 'align': [] }],
+      [{ align: [] }],
 
-      ['clean'] // remove formatting button
+      ["clean"], // remove formatting button
     ],
-  }
+  };
 
   const handleOpenModalEditComment = () => {
     if (accessToken != null) {
-      setIsModalEditCommentOpen(!isModalEditCommentOpen)
+      setIsModalEditCommentOpen(!isModalEditCommentOpen);
       setContentError(false);
     } else {
       // Lưu lại đường dẫn hiện tại
       const currentPath = window.location.pathname;
 
       Swal.fire({
-        title: 'Not authorized yet',
-        text: 'Please login first',
-        icon: 'info',
+        title: "Not authorized yet",
+        text: "Please login first",
+        icon: "info",
         showCancelButton: true,
-        confirmButtonText: 'Login',
-        cancelButtonText: 'Close',
+        confirmButtonText: "Login",
+        cancelButtonText: "Close",
       }).then((result) => {
         if (result.isConfirmed) {
           navigate('/login', {
@@ -137,7 +137,7 @@ const Comment = ({
         }
       })
     }
-  }
+  };
 
   const handleEditComment = () => {
     if (!content.trim()) {
@@ -155,16 +155,16 @@ const Comment = ({
       http.put(`user/comment/update/${commentId}/`, formData)
         .then(() => {
           Swal.fire(
-            'Ta~Da~',
-            'You\'ve update your comment successfully',
-            'success'
+            "Ta~Da~",
+            "You've update your comment successfully",
+            "success"
           ).then(() => {
             navigate(0);
-          })
+          });
         })
         .catch((reject) => {
           console.log(reject);
-          toast.error('Oops. Try again', {
+          toast.error("Oops. Try again", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -173,19 +173,19 @@ const Comment = ({
             draggable: true,
             progress: undefined,
             theme: "colored",
-          })
-        })
+          });
+        });
     }
-  }
+  };
 
   const handleCloseModalEditComment = () => {
-    setIsModalEditCommentOpen(false)
-  }
+    setIsModalEditCommentOpen(false);
+  };
 
   const onChangeContent = (value) => {
-    setContent(value)
-    console.log('Comment:', value)
-  }
+    setContent(value);
+    console.log("Comment:", value);
+  };
 
   // --------------------------     Handle Comment     --------------------------
   const handleAuthorized = () => {
@@ -280,7 +280,7 @@ const Comment = ({
 
   // ---------------------------      Modal Draggable      ---------------------------
   const draggleRef = useRef(null);
-  const [disabled,] = useState(false);
+  const [disabled] = useState(false);
   const [bounds, setBounds] = useState({
     left: 0,
     top: 0,
@@ -304,16 +304,20 @@ const Comment = ({
 
   useEffect(() => {
     const fetchAvatar = () => {
-      getDownloadURL(imageRef).then((resolve) => {
-        setAvatarUrl(resolve);
-      }).catch((reject) => {
-        console.log(reject)
-      })
-    }
+      if (avatar != "") {
+        getDownloadURL(imageRef)
+          .then((resolve) => {
+            setAvatarUrl(resolve);
+          })
+          .catch((reject) => {
+            console.log(reject);
+          });
+      }
+    };
 
     fetchAvatar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   return (
     <div className={cx("comment-container")}>
@@ -459,11 +463,7 @@ const Comment = ({
         onCancel={handleCloseModalEditComment}
         footer={[
           <>
-            <Button
-              type="primary"
-              key="edit"
-              onClick={handleEditComment}
-            >
+            <Button type="primary" key="edit" onClick={handleEditComment}>
               Update
             </Button>
             <Button
@@ -474,7 +474,7 @@ const Comment = ({
             >
               Cancel
             </Button>
-          </>
+          </>,
         ]}
       >
         <div className={cx("modal-wrapper")}>
@@ -485,9 +485,7 @@ const Comment = ({
             onChange={onChangeContent}
           />
           {contentError && (
-            <div className={cx("error-message")}>
-              Content is required
-            </div>
+            <div className={cx("error-message")}>Content is required</div>
           )}
         </div>
       </Modal>

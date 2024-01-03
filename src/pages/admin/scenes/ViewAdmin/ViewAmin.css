@@ -20,12 +20,10 @@
     font-size: xx-large;
     margin: 10px;
     display: flex;
-    flex-direction:column;
-
     .new{
         display: flex;
         flex-direction:column;
-        width: 100%;
+        width: 50%;
         .title-text{
             width: 10%;
         }
@@ -39,21 +37,9 @@
     .comment{
         display: flex;
         flex-direction:column;
-        width: 100%;
+        width: 50%;
         .title-text{
             width: 10%;
         }
-        .text {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            &_contain {
-              width: 300px;
-              height: 400px;
-              overflow-y: auto;
-              border: 1px solid #ccc;
-            }
-        }  
     }
 }
-
