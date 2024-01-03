@@ -29,4 +29,5 @@ code {
   background: #fff !important;
   border-bottom-left-radius: 6px !important;
   border-bottom-right-radius: 6px !important;
+  min-height: 100px;
 }
