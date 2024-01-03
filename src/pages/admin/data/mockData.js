@@ -1,5 +1,8 @@
 import { tokens } from "../theme";
 
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 export const mockDataTeam = [
   {
     id: 1,
@@ -395,6 +398,105 @@ export const mockBarData = [
     donut: 49,
     donutColor: "hsl(274, 70%, 50%)",
   },
+];
+
+export const mockBarNew = [
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'January' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'February' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'March' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'April' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'May' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'June' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'July' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'August' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'September' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'October' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'November' },
+  { real: getRandomNumber(100, 999), fake: getRandomNumber(100, 999), month: 'December' }
+];
+export const mockLineComment = [
+  {
+    id: "comment",
+    color: tokens("dark").greenAccent[500],
+    data: [
+      {
+        x: "January",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "February",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "March",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "April",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "May",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "June",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "July",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "August",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "September",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "October",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "November",
+        y: getRandomNumber(100, 999),
+      },
+      {
+        x: "December",
+        y: 14,
+      },
+    ],
+  },
+];
+
+export const mockPieMonth = [
+  {
+    id: "Total News Fake",
+    label: "Total News Fake",
+    value: getRandomNumber(100, 999),
+    color: "hsl(104, 70%, 50%)",
+  },
+  {
+    id: "Total News Real",
+    label: "Total News Real",
+    value: getRandomNumber(100, 999),
+    color: "hsl(162, 70%, 50%)",
+  },
+  {
+    id: "Total User",
+    label: "Total User",
+    value: getRandomNumber(100, 999),
+    color: "hsl(291, 70%, 50%)",
+  },
+  {
+    id: "Total Comments",
+    label: "Total Comments",
+    value: getRandomNumber(100, 999),
+    color: "hsl(229, 70%, 50%)",
+  },
+ 
 ];
 
 export const mockPieData = [

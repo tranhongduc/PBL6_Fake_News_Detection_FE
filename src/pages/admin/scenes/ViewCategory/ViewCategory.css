@@ -6,3 +6,37 @@
     flex-direction: column;
     width: 100%;
 }
+.account-info{
+    font-size: xx-large;
+    margin: 10px;
+    .info-container{
+        display: flex;
+        .title-text{
+            width: 20%;
+        }
+    }
+}
+.news-comment{
+    font-size: xx-large;
+    margin: 10px;
+    display: flex;
+    flex-direction:column;
+
+    .new{
+        display: flex;
+        flex-direction:column;
+        width: 100%;
+        .info-container{
+            display: flex;
+            .title-text{
+                width: 20%;
+            }
+        }
+    }
+    .divide{
+        height: auto;
+        font-size: 90px;
+        border: 2px solid;
+        flex-grow: 1;
+    }
+}

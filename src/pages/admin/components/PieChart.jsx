@@ -2,14 +2,65 @@ import { ResponsivePie } from "@nivo/pie";
 import { tokens } from "../theme";
 import { useTheme } from "@mui/material";
 import { mockPieData as data } from "../data/mockData";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import AuthUser from "../../../utils/AuthUser";
 
-const PieChart = () => {
+const PieChart = ({ newsData = [], a = 1 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [totalCategory, setTotalCategory] = useState([]);
+
+  const { http } = AuthUser();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await http
+        .get(`/admin/total_category/`)
+        .then((resolve) => {
+          console.log("total_category:", resolve);
+          const categoriesData = resolve.data.categories;
+
+          const updatedCategories = categoriesData.map((category) => {
+            return {
+              ...category,
+              label: category.name,
+              value: category.news_count,
+            };
+          });
+
+          setTotalCategory(updatedCategories);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+    };
+    fetchData();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const legends = [
+    {
+      anchor: "bottom",
+      direction: "row",
+      justify: false,
+      translateX: 0,
+      translateY: 50,
+      itemWidth: 100,
+      itemHeight: 10,
+      itemsSpacing: 0,
+      symbolSize: 20,
+      itemDirection: "left-to-right",
+    },
+  ];
+
+  if (!a) {
+    legends.splice(0, legends.length); // Xóa tất cả phần tử trong mảng legends nếu a là false
+  }
+
   return (
     <ResponsivePie
-      data={data}
+      data={newsData}
       theme={{
         axis: {
           domain: {
@@ -78,31 +129,7 @@ const PieChart = () => {
           spacing: 10,
         },
       ]}
-      legends={[
-        {
-          anchor: "bottom",
-          direction: "row",
-          justify: false,
-          translateX: 0,
-          translateY: 56,
-          itemsSpacing: 0,
-          itemWidth: 100,
-          itemHeight: 18,
-          itemTextColor: "#999",
-          itemDirection: "left-to-right",
-          itemOpacity: 1,
-          symbolSize: 18,
-          symbolShape: "circle",
-          effects: [
-            {
-              on: "hover",
-              style: {
-                itemTextColor: "#000",
-              },
-            },
-          ],
-        },
-      ]}
+      legends={legends}
     />
   );
 };
