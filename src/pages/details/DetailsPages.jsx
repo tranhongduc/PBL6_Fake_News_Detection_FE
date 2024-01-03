@@ -34,6 +34,7 @@ const DetailsPages = () => {
   const { id } = useParams()
   const [newsDetail, setNewsDetail] = useState({})
   const [listCategories, setListCategories] = useState([])
+  const [listAccountInfo, setListAccountInfo] = useState([])
   const [comment, setComment] = useState('')
   const [contentError, setContentError] = useState(false);
   const [image, setImage] = useState("");
@@ -41,6 +42,8 @@ const DetailsPages = () => {
 
   const [isModalDeleteBlogOpen, setOpenModalDeleteBlog] = useState(false)
   const [isOnModeEditBlog, setOnModeEditBlog] = useState(false)
+  const [isOnModePreview, setOnModePreview] = useState(false);
+  const [openReplies, setOpenReplies] = useState([]);
   // const [isModalCreateCommentOpen, setIsModalCreateCommentOpen] = useState(false)
   const [isReportModalOpen, setOpenReportModal] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null);
@@ -361,10 +364,6 @@ const DetailsPages = () => {
   }
 
   // --------------------------     Handle Comment     --------------------------
-  // const handleCloseModalCreateComment = () => {
-  //   setIsModalCreateCommentOpen(false)
-  // }
-
   const handleAuthorized = () => {
     // Lưu lại đường dẫn hiện tại
     const currentPath = window.location.pathname;
@@ -375,40 +374,8 @@ const DetailsPages = () => {
       }
     });
   }
-
-  const handleOpenModalCreateComment = () => {
-    if (accessToken != null) {
-      // setIsModalCreateCommentOpen(!isModalCreateCommentOpen)
-      // setContentError(false);
-    } else {
-      // Lưu lại đường dẫn hiện tại
-      const currentPath = window.location.pathname;
-
-      Swal.fire({
-        title: 'Not authorized yet',
-        text: 'Please login first',
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'Login',
-        cancelButtonText: 'Close',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate('/login', {
-            state: {
-              from: currentPath,
-            }
-          });
-        }
-      })
-    }
-  }
-
-  const onChangeComment = (value) => {
-    setComment(value)
-    console.log('Comment:', value)
-  }
-
-  const handleCreateComment = () => {
+  
+  const handlePostComment = () => {
     if (!comment.trim()) {
       setContentError(true);
     } else {
@@ -446,6 +413,31 @@ const DetailsPages = () => {
           })
         })
     }
+  }
+
+  const handlePreviewComment = () => {
+    if (comment.trim() !== "") {
+      setContentError(false)
+    }
+
+    if (isOnModePreview) {
+      const previewWrapper = document.querySelector('.DetailsPages_preview-wrapper__yEOZ5');
+      console.log(previewWrapper)
+
+      // Thêm lớp close ngay khi đóng modal
+      previewWrapper.classList.add(styles.closepreview);
+
+      setTimeout(() => {
+        setOnModePreview(false);
+      }, 400)
+    } else {
+      setOnModePreview(true);
+    }
+  }
+
+  const onChangeComment = (value) => {
+    setComment(value)
+    console.log('Comment:', value)
   }
 
   // --------------------------     Fetch API     --------------------------
@@ -493,7 +485,9 @@ const DetailsPages = () => {
         .then((resolve) => {
           console.log('List Comments:', resolve.data)
           const listComments = resolve.data.comments
+          const listAccountInfo = resolve.data.account_info_list
           setListComments(listComments);
+          setListAccountInfo(listAccountInfo)
         })
         .catch((reject) => {
           console.log('Error:', reject);
@@ -670,16 +664,29 @@ const DetailsPages = () => {
               </div>
               <div className={cx("comment")}>
                 {listComments.map((comment, index) => {
+                  // Tìm thông tin tương ứng với account_id của comment trong account_info_list
+                  const accountInfo = listAccountInfo.find(info => info.account_id === comment.author_id);
+
                   return (
                     <Comment
+                      newsId={id}
                       commentId={comment.id}
-                      avatar={comment.avatar}
+                      accountAvatar={comment.avatar}
                       comment={comment.text}
+                      joinDate={comment.join_date}
+                      commentCount={accountInfo ? accountInfo.comment_counts : 0}
+                      totalLike={accountInfo ? accountInfo.like_counts : 0}
                       publishedDate={comment.created_at}
-                      username={comment.author}
+                      accountUsername={comment.author}
                       email={comment.email}
                       isEditAllowed={comment.author === username ? true : false}
                       toggleReportModal={() => setOpenReportModal(!isReportModalOpen)}
+                      isOpenReply={openReplies[index] || false}
+                      setOpenReply={(value) => {
+                        const newOpenReplies = [...openReplies];
+                        newOpenReplies[index] = value;
+                        setOpenReplies(newOpenReplies);
+                      }}
                     />
                   )
                 })}
@@ -713,20 +720,33 @@ const DetailsPages = () => {
                   </div>
                   <div className={cx("vertical-divider")} />
                   <div className={cx("comment-wrapper__right")}>
-                    <div className={cx("right-top")}>
+                    <div className={cx("right-editor")}>
                       <TextEditor
                         modules={createCommentModule}
                         value={comment}
                         placeholder={"Write your comment"}
                         onChange={onChangeComment}
                       />
+                      {contentError && (
+                        <div className={cx("error-message")}>
+                          <p>Content is required</p>
+                        </div>
+                      )}
                     </div>
+                    {isOnModePreview ? (
+                      <div className={cx("preview-wrapper")}>
+                        <p>Preview</p>
+                        <div className={cx("preview-content")} dangerouslySetInnerHTML={{ __html: comment }} />
+                      </div>
+                    ) : (
+                      <></>
+                    )}
                     <div className={cx("right-bottom")}>
-                      <button className={cx("btn-post")} onClick={handleOpenModalCreateComment}>
+                      <button className={cx("btn-post")} onClick={handlePostComment}>
                         <BsFillReplyFill size={16} />
                         <p>POST</p>
                       </button>
-                      <button className={cx("btn-preview")} onClick={handleOpenModalCreateComment}>
+                      <button className={cx("btn-preview")} onClick={handlePreviewComment}>
                         <FaEye size={16} />
                         <p>PREVIEW</p>
                       </button>
@@ -740,7 +760,6 @@ const DetailsPages = () => {
                   </button>
                 </div>
               )}
-
             </>
           )}
         </div>
