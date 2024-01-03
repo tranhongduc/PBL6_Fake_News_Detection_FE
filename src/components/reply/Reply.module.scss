@@ -47,19 +47,13 @@
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
 
-    > span {
+    > img {
+        background: #fff;
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        
-        img {
-            background: #fff;
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            border: 2px solid #8ED3BB;
-            object-fit: cover;
-        }
+        border: 2px solid #8ED3BB;
+        object-fit: cover;
     }
 }
 
@@ -78,6 +72,29 @@
 .reply-content {
     >p {
         margin-block: 4px;
+    }
+}
+
+.reply-edit {
+    width: 100%;
+
+    &__bottom {
+        margin-top: 12px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+    }
+}
+
+.reply-content {
+    height: 70%;
+    font-weight: 400;
+    font-size: 16px;
+    margin-block: 4px;
+
+    > p {
+        margin-block: 8px;
     }
 }
 
@@ -170,6 +187,55 @@
     animation: closeReply ease .4s;
 }
 
+.left-edit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .edit-text {
+        margin: 0;
+        padding-left: 4px;
+    }
+
+    &:hover {
+        transition: 0.2s;
+        cursor: pointer;
+
+        .edit-icon {
+            color: #d7d235
+        }
+
+        .edit-text {
+            text-decoration: underline;
+        }
+    }
+}
+
+.left-delete {
+    margin-left: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .delete-text {
+        margin: 0;
+        padding-left: 4px;
+    }
+
+    &:hover {
+        transition: 0.2s;
+        cursor: pointer;
+
+        .delete-icon {
+            color: red
+        }
+
+        .delete-text {
+            text-decoration: underline;
+        }
+    }
+}
+
 .right-bottom-editor {
     margin-top: 18px;
     display: flex;
@@ -179,7 +245,14 @@
     margin-bottom: 8px;
 }
 
-.btn-reply {
+.right-bottom-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-reply, .btn-edit {
     display: flex;
     justify-content: space-between;
     align-items: center;
