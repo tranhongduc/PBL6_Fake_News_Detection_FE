@@ -712,7 +712,6 @@ const DetailsPages = () => {
                       email={comment.email}
                       commentCount={accountInfo ? accountInfo.comment_counts : 0}
                       totalLike={accountInfo ? accountInfo.like_counts : 0}
-                      isEditAllowed={comment.author === username ? true : false}
                       toggleReportModal={() => setOpenReportModal(!isReportModalOpen)}
                       isOpenReply={openReplies[index] || false}
                       setOpenReply={(value) => {
