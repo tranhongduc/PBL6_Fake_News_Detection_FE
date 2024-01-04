@@ -157,8 +157,6 @@ const Reply = ({
         setAuthorizationHeader(accessToken);
       }
 
-      console.log('comment id:', commentId)
-
       http.put(`user/comment/update/${commentId}/`, formData)
         .then(() => {
           Swal.fire(
@@ -229,95 +227,6 @@ const Reply = ({
     setContent(value);
     console.log("Comment:", value);
   };
-
-  // --------------------------     Handle Reply     --------------------------
-  const handleOpenReply = () => {
-    if (accessToken === null) {
-      // Lưu lại đường dẫn hiện tại
-      const currentPath = window.location.pathname;
-
-      Swal.fire({
-        title: 'Not authorized yet',
-        text: 'Please login to post reply',
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'Login',
-        cancelButtonText: 'Close',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate('/login', {
-            state: {
-              from: currentPath,
-            }
-          });
-        }
-      })
-    }
-  }
-
-  const handlePreviewReply = () => {
-    if (reply.trim() !== "") {
-      setRelpyError(false)
-    }
-
-    if (isOnModePreview) {
-      const previewReply = document.querySelector('.Comment_preview-reply__wEGWO');
-
-      // Thêm lớp close ngay khi đóng modal
-      previewReply.classList.add(styles.closepreview);
-
-      setTimeout(() => {
-        setOnModePreview(false);
-      }, 400)
-    } else {
-      setOnModePreview(true);
-    }
-  }
-
-  const handlePostReply = () => {
-    if (!reply.trim()) {
-      setRelpyError(true);
-    } else {
-      setRelpyError(false);
-
-      const formData = new FormData();
-      formData.append('text', reply);
-      formData.append('news', newsId);
-
-      if (accessToken != null) {
-        setAuthorizationHeader(accessToken);
-      }
-
-      http.post(`user/comment/store/`, formData)
-        .then(() => {
-          Swal.fire(
-            'Ta~Da~',
-            'You\'ve post your reply successfully',
-            'success'
-          ).then(() => {
-            navigate(0);
-          })
-        })
-        .catch((reject) => {
-          console.log(reject);
-          toast.error('Oops. Try again', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          })
-        })
-    }
-  }
-
-  const onChangeReply = (value) => {
-    setReply(value)
-    console.log('Reply:', value)
-  }
 
   // --------------------------     Handle Like Comment     --------------------------
   const handleLikeComment = () => {
@@ -438,11 +347,11 @@ const Reply = ({
                   <div className={cx("right-bottom__left")}>
                     <div onClick={toggleCommentEditor} className={cx("left-edit")}>
                       <FaEdit className={cx("edit-icon")} />
-                      <p className={cx("edit-text")}>{isOpenCommentEditor ? 'Close Edit' : 'Edit Comment'}</p>
+                      <p className={cx("edit-text")}>{isOpenCommentEditor ? 'Close Edit Reply' : 'Edit Reply'}</p>
                     </div>
                     <div onClick={handleDeleteComment} className={cx("left-delete")}>
                       <MdDelete size={18} className={cx("delete-icon")} />
-                      <p className={cx("delete-text")}>Delete Comment</p>
+                      <p className={cx("delete-text")}>Delete Reply</p>
                     </div>
                   </div>
                 )
@@ -460,10 +369,6 @@ const Reply = ({
             <div onClick={handleLikeComment} className={cx("bottom-right__like")}>
               <AiFillLike />
               <p className={cx("like-text")}>Like</p>
-            </div>
-            <div onClick={handleOpenReply} className={cx("bottom-right__reply")}>
-              <BsFillReplyFill />
-              <p className={cx("reply-text")}>Reply</p>
             </div>
           </div>
         </div>
