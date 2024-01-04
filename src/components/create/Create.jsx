@@ -79,71 +79,136 @@ const Create = () => {
     // (Sử dụng API hoặc các phương thức khác để thực hiện tác vụ này)
     const selectedCategory = listCategories.find((category) => category.id === values.category)
     const categoryName = selectedCategory.name
-    
 
-    const newsRef = ref(storage, `news/${categoryName}/${image.name + v4()}/`);
-    uploadBytes(newsRef, image).then(() => {
-      getDownloadURL(newsRef).then((url) => {
-        // Upload ảnh lên Firebase Storage
-        const formData = new FormData();
-        
-        const { title, category, text } = values
+    if (image === "") {
+      const formData = new FormData();
 
-        formData.append('title', title)
-        formData.append('category', category)
-        formData.append('text', text)
-        formData.append('image', url);
+      const { title, category, text } = values
 
-        if (accessToken != null) {
-          setAuthorizationHeader(accessToken);
-        }
+      formData.append('title', title)
+      formData.append('category', category)
+      formData.append('text', text)
+      formData.append('image', DEFAULT_IMAGE_LINK);
 
-        http.post('user/news/store/', formData)
-          .then(() => {
-            Swal.fire(
-              'Good job!',
-              'You\'ve created new blog successfully',
-              'success'
-            ).then(() => {
-              navigate(0);
+      if (accessToken != null) {
+        setAuthorizationHeader(accessToken);
+      }
+
+      http.post('user/news/store/', formData)
+        .then(() => {
+          Swal.fire(
+            'Good job!',
+            'You\'ve created new blog successfully',
+            'success'
+          ).then(() => {
+            navigate(0);
+          })
+        })
+        .catch((reject) => {
+          console.log(reject);
+
+          const { text } = reject.response.data
+          if (text !== undefined) {
+            toast.error(text[0], {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
             })
-          })
-          .catch((reject) => {
-            console.log(reject);
+          } else {
+            Swal.fire(
+              'Oops',
+              'Try again',
+              'error'
+            )
+          }
+        })
+        .catch((error) => {
+          console.log('Error:', error)
+          Swal.fire(
+            'Oops',
+            'Try again',
+            'error'
+          )
+        })
 
-            const { text } = reject.response.data
-            if (text !== undefined) {
-              toast.error(text[0], {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-              })
-            } else {
+      // const newsRef = ref(storage, DEFAULT_IMAGE_LINK);
+      // uploadBytes(newsRef, DEFAULT_IMAGE_LINK).then(() => {
+      //   getDownloadURL(newsRef).then((url) => {
+      //     // Upload ảnh lên Firebase Storage
+      //     console.log('Url:', url)
+
+    } else {
+      const newsRef = ref(storage, `news/${categoryName}/${image.name + v4()}/`);
+      uploadBytes(newsRef, image).then(() => {
+        getDownloadURL(newsRef).then((url) => {
+          // Upload ảnh lên Firebase Storage
+          console.log('Url:', url)
+          const formData = new FormData();
+
+          const { title, category, text } = values
+
+          formData.append('title', title)
+          formData.append('category', category)
+          formData.append('text', text)
+          formData.append('image', url);
+
+          if (accessToken != null) {
+            setAuthorizationHeader(accessToken);
+          }
+
+          http.post('user/news/store/', formData)
+            .then(() => {
               Swal.fire(
-                'Oops',
-                'Try again',
-                'error'
-              )
-            }
-          })
-      }).catch((error) => {
-        console.log('Error:', error)
-        Swal.fire(
-          'Oops',
-          'Try again',
-          'error'
-        )
+                'Good job!',
+                'You\'ve created new blog successfully',
+                'success'
+              ).then(() => {
+                navigate(0);
+              })
+            })
+            .catch((reject) => {
+              console.log(reject);
+
+              const { text } = reject.response.data
+              if (text !== undefined) {
+                toast.error(text[0], {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "colored",
+                })
+              } else {
+                Swal.fire(
+                  'Oops',
+                  'Try again',
+                  'error'
+                )
+              }
+            })
+        }).catch((error) => {
+          console.log('Error:', error)
+          Swal.fire(
+            'Oops',
+            'Try again',
+            'error'
+          )
+        })
       })
-    })
+    }
   }
 
   // Failed case
   const onCreatePostFailed = (error) => {
+    console.log('')
     console.log('Error:', error)
     toast.error('Please input all fields', {
       position: "top-right",
@@ -279,7 +344,7 @@ const Create = () => {
                     htmlType="submit"
                     className={cx("btn-submit")}
                   >
-                    Create Post
+                    Create Blog
                   </Button>
                 </div>
               </Form.Item>

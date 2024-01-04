@@ -126,6 +126,7 @@ const Blog = () => {
   }
 
   const onChangeCategory = (value) => {
+    console.log('Category ID:', value)
     setCategory(value)
   }
 

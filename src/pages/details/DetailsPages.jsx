@@ -203,6 +203,8 @@ const DetailsPages = () => {
       setAuthorizationHeader(accessToken);
     }
 
+    console.log('Id:', id)
+
     http.delete(`admin/news/delete/${id}/`)
       .then(() => {
         Swal.fire(
@@ -238,9 +240,13 @@ const DetailsPages = () => {
     // Gửi đường dẫn ảnh đến Django để lưu vào database
     // (Sử dụng API hoặc các phương thức khác để thực hiện tác vụ này)
     const selectedCategory = listCategories.find((category) => category.id === values.category)
+    console.log('Selected category:', selectedCategory)
+
     const categoryName = selectedCategory.name
+    console.log(categoryName)
 
     if (image !== "") {
+      console.log('Image:', image)
       const newsRef = ref(storage, `news/${categoryName}/${image.name + v4()}/`);
       uploadBytes(newsRef, image).then(() => {
         getDownloadURL(newsRef).then((url) => {
@@ -892,6 +898,7 @@ const DetailsPages = () => {
               type="primary"
               className={cx("btn-confirm-delete")}
               key="delete"
+              onClick={handleDeleteBlog}
             >
               OK
             </Button>
