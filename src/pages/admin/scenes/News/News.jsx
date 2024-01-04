@@ -1,31 +1,40 @@
 import "./News.css";
-import { Box, useTheme } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Button,
+  MenuItem,
+  Pagination,
+  Select,
+  List,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import ClearIcon from "@mui/icons-material/Clear";
 import CheckIcon from "@mui/icons-material/Check";
 import Header from "../../components/Header";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthUser from "../../../../utils/AuthUser";
+import Swal from "sweetalert2";
+import { Modal } from "antd";
+import Draggable from "react-draggable";
 
 const News = () => {
   const { http } = AuthUser();
   const navigate = useNavigate();
   const theme = useTheme();
   const [news, setNews] = useState([]);
+  const [pageNew, setPageNew] = React.useState(1);
+  const [pageNewSize, setPageNewSize] = React.useState(20);
+  const [pageNewTotal, setPageNewTotal] = React.useState();
+  const [openModals, setOpenModals] = useState(false);
+  const [idToD, setIdToD] = useState();
   const colors = tokens(theme.palette.mode);
   const columns = [
-    { field: "id", headerName: "ID" },
     {
-      field: "author",
-      headerName: "Author",
-      flex: 0.5,
-    },
-    {
-      field: "category",
-      headerName: "Category",
-      flex: 0.5,
+      field: "ids",
+      headerName: "ID",
     },
     {
       field: "title",
@@ -33,9 +42,14 @@ const News = () => {
       flex: 1,
     },
     {
+      field: "category",
+      headerName: "Category",
+      flex: 0.25,
+    },
+    {
       field: "created_at",
       headerName: "Created day",
-      flex: 1,
+      flex: 0.25,
       valueGetter: (params) => {
         const createdDate = new Date(params.row.created_at);
         const day = createdDate.getDate();
@@ -48,10 +62,57 @@ const News = () => {
     {
       field: "label",
       headerName: "Label",
-      flex: 1,
       renderCell: ({ row: { label } }) => {
-        if (label === "real") return <CheckIcon />;
-        else return <ClearIcon />;
+        return (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              width: "100%",
+            }}
+          >
+            {label === "real" ? (
+              <CheckIcon
+                style={{
+                  color: colors.greenAccent[300],
+                }}
+              />
+            ) : (
+              <ClearIcon
+                style={{
+                  color: colors.redAccent[300],
+                }}
+              />
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      field: "deleteButton",
+      headerName: "Delete",
+      flex: 0.1,
+      renderCell: ({ row }) => {
+        const handleDeleteClick = () => {
+          // Viết logic xử lý khi nút "xoá" được click, có thể gọi hàm onDelete hoặc một hàm tương tự
+          console.log("Delete clicked for row with ID:", row.ids);
+          setOpenModals(true);
+          setIdToD(row.ids);
+        };
+
+        return (
+          <div style={{ textAlign: "center" }}>
+            <Button
+              onClick={handleDeleteClick}
+              variant="contained"
+              color="error"
+            >
+              Delete
+            </Button>
+          </div>
+        );
       },
     },
   ];
@@ -62,13 +123,129 @@ const News = () => {
     navigate("/admin/view_news", { state: row });
   };
 
+  //delete
+  const handleNo = () => {
+    setOpenModals(false);
+  };
+  const handleYes = () => {
+    http
+      .delete(`comment/delete/${idToD}`)
+      .then(() => {
+        Swal.fire(
+          "Update!",
+          "You have successfully Delete News",
+          "success"
+        ).then(() => {
+          navigate(0);
+        });
+      })
+      .catch((reject) => {
+        console.log(reject);
+      });
+
+    setOpenModals(false);
+  };
+
+  //
+  // Handle click out boundary of modal
+  const handleOk = () => {
+    setOpenModals(false);
+  };
+
+  // Handle click button "X" of modal
+  const handleCancel = () => {
+    setOpenModals(false);
+  };
+
+  // ---------------------------      Modal Draggable      ---------------------------
+  const draggleRef = useRef(null);
+  const [disabled] = useState(false);
+  const [bounds, setBounds] = useState({
+    left: 0,
+    top: 0,
+    bottom: 0,
+    right: 0,
+  });
+
+  const onStart = (_event, uiData) => {
+    const { clientWidth, clientHeight } = window.document.documentElement;
+    const targetRect = draggleRef.current?.getBoundingClientRect();
+    if (!targetRect) {
+      return;
+    }
+    setBounds({
+      left: -targetRect.left + uiData.x,
+      right: clientWidth - (targetRect.right - uiData.x),
+      top: -targetRect.top + uiData.y,
+      bottom: clientHeight - (targetRect.bottom - uiData.y),
+    });
+  };
+
+  //news
+
+  const handlePageChange = (event, newPage) => {
+    fetchDataNew(newPage, pageNewSize);
+    setPageNew(newPage);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    setPageNewSize(newPageSize);
+    setPageNew(1);
+    fetchDataNew(1, newPageSize);
+  };
+  const fetchDataNew = async (page, pageSize) => {
+    await http
+      .get(`/admin/news_list/${pageSize}/${page}`)
+      .then((resolve) => {
+        console.log("news:", resolve);
+        const News_with_id = resolve.data.news.map((item, index) => ({
+          ids: index + 1 + (page - 1) * pageSize,
+          ...item,
+        }));
+        setPageNewTotal(resolve.data.total_pages);
+        setNews(News_with_id);
+      })
+      .catch((reject) => {
+        console.log(reject);
+      });
+  };
+
+  const CustomPagination = () => (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <Pagination
+        count={pageNewTotal}
+        page={pageNew}
+        onChange={handlePageChange}
+        showFirstButton
+        showLastButton
+        boundaryCount={2}
+        siblingCount={2}
+        style={{ marginRight: "20px" }}
+      />
+      <Select
+        value={pageNewSize}
+        onChange={(e) => handlePageSizeChange(e.target.value)}
+        style={{ marginRight: "20px" }}
+      >
+        <MenuItem value={20}>20</MenuItem>
+        <MenuItem value={50}>50</MenuItem>
+        <MenuItem value={100}>100</MenuItem>
+      </Select>
+    </div>
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       await http
-        .get(`/admin/news_list/`)
+        .get(`/admin/news_list/${pageNewSize}/${pageNew}`)
         .then((resolve) => {
-          console.log(resolve);
-          setNews(resolve.data.news);
+          console.log("news:", resolve);
+          const News_with_id = resolve.data.news.map((item, index) => ({
+            ids: index + 1 + (pageNew - 1) * pageNewSize,
+            ...item,
+          }));
+          setPageNewTotal(resolve.data.total_pages);
+          setNews(News_with_id);
         })
         .catch((reject) => {
           console.log(reject);
@@ -109,15 +286,53 @@ const News = () => {
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
           },
-          "& .MuiDataGrid-root": { fontSize: "1rem" },
+          "& .MuiDataGrid-root": { fontSize: "1.5rem" },
         }}
       >
         <DataGrid
           rows={news}
           columns={columns}
-          onCellClick={handleDoubleClickCell}
+          pagination
+          disableRowSelectionOnClick={true}
+          pageSize={pageNewSize}
+          rowCount={news.length}
+          paginationMode="client"
+          page={pageNew}
+          onPageChange={handlePageChange}
+          onRowDoubleClick={handleDoubleClickCell}
+          onPageSizeChange={(newPageSize) => handlePageSizeChange(newPageSize)}
+          slots={{
+            pagination: CustomPagination,
+          }}
         />
       </Box>
+
+      <Modal
+        open={openModals}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={null}
+        modalRender={(modal) => (
+          <Draggable
+            disabled={disabled}
+            bounds={bounds}
+            onStart={(event, uiData) => onStart(event, uiData)}
+          >
+            <div ref={draggleRef}>{modal}</div>
+          </Draggable>
+        )}
+      >
+        <h2>Do you want to select this?</h2>
+        <div style={{ textAlign: "right" }}>
+          <Button onClick={handleNo} style={{ marginRight: 8 }}>
+            No
+          </Button>
+
+          <Button onClick={handleYes} variant="contained" color="error">
+            Yes
+          </Button>
+        </div>
+      </Modal>
     </Box>
   );
 };

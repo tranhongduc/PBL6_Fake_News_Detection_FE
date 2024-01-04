@@ -40,9 +40,7 @@ const Category = () => {
       await http
         .get(`/admin/categories_list/`)
         .then((resolve) => {
-          console.log(resolve);
           setCategory(resolve.data.categories);
-          console.log(category);
         })
         .catch((reject) => {
           console.log(reject);
@@ -85,11 +83,11 @@ const Category = () => {
           "& .MuiDataGrid-root": { fontSize: "1.5rem" },
         }}
       >
-        {console.log("1")}
         <DataGrid
           rows={category}
           columns={columns}
           onCellClick={handleDoubleClickCell}
+          hideFooterPagination={true}
         />
       </Box>
     </Box>

@@ -1,5 +1,12 @@
 import "./User.css";
-import { Box, useTheme, Button } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Button,
+  MenuItem,
+  Pagination,
+  Select,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
@@ -15,6 +22,10 @@ const User = () => {
   const theme = useTheme();
   const [user, setUser] = useState([]);
   const colors = tokens(theme.palette.mode);
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(5);
+  const [pageTotal, setPageTotal] = React.useState();
+
   const columns = [
     { field: "id", headerName: "ID" },
     {
@@ -94,16 +105,70 @@ const User = () => {
     navigate("/admin/view_user", { state: row });
   };
 
+  //custom
+
+  const handlePageChange = (event, newPage) => {
+    fetchDataNew(newPage, pageSize);
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    setPageSize(newPageSize);
+    setPage(1);
+    fetchDataNew(1, newPageSize);
+  };
+  const fetchDataNew = async (page, pageSize) => {
+    await http
+      .get(`/admin/list-user/${pageSize}/${page}`)
+      .then((resolve) => {
+        const dataWithIds = resolve.data.users.map((item, index) => ({
+          id: (page - 1) * pageSize + index + 1,
+          ...item,
+        }));
+        setUser(dataWithIds);
+        setPageTotal(resolve.data.total_pages);
+        console.log("user list:", resolve);
+      })
+      .catch((reject) => {
+        console.log(reject);
+      });
+  };
+
+  const CustomPagination = () => (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <Pagination
+        count={pageTotal}
+        page={page}
+        onChange={handlePageChange}
+        showFirstButton
+        showLastButton
+        boundaryCount={2}
+        siblingCount={2}
+        style={{ marginRight: "20px" }}
+      />
+      <Select
+        value={pageSize}
+        onChange={(e) => handlePageSizeChange(e.target.value)}
+        style={{ marginRight: "20px" }}
+      >
+        <MenuItem value={5}>5</MenuItem>
+        <MenuItem value={10}>10</MenuItem>
+        <MenuItem value={20}>20</MenuItem>
+      </Select>
+    </div>
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       await http
-        .get(`/admin/list-user/`)
+        .get(`/admin/list-user/${pageSize}/${page}`)
         .then((resolve) => {
           const dataWithIds = resolve.data.users.map((item, index) => ({
-            id: index + 1,
+            id: index + 1 + (page - 1) * pageSize,
             ...item,
           }));
           setUser(dataWithIds);
+          setPageTotal(resolve.data.total_pages);
           console.log("user  list :", resolve);
         })
         .catch((reject) => {
@@ -149,7 +214,18 @@ const User = () => {
         <DataGrid
           rows={user}
           columns={columns}
-          onCellDoubleClick={handleDoubleClickCell}
+          pagination
+          disableRowSelectionOnClick={true}
+          pageSize={pageSize}
+          rowCount={user.length}
+          paginationMode="client"
+          page={page}
+          onPageChange={handlePageChange}
+          onRowDoubleClick={handleDoubleClickCell}
+          onPageSizeChange={(newPageSize) => handlePageSizeChange(newPageSize)}
+          slots={{
+            pagination: CustomPagination,
+          }}
         />
       </Box>
     </Box>

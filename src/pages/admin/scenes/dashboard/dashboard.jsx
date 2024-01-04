@@ -1,30 +1,233 @@
 import "./Dashboard.css";
-import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { mockTransactions } from "../../data/mockData";
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import {
+  mockPieMonth as data,
+  mockBarNew as dataBar,
+  mockLineComment as dataLine,
+} from "../../data/mockData";
 import EmailIcon from "@mui/icons-material/Email";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import NewspaperIcon from "@mui/icons-material/Newspaper";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import TrafficIcon from "@mui/icons-material/Traffic";
+import { Select } from "antd";
 import Header from "../../components/Header";
 import LineChart from "../../components/LineChart";
-import GeographyChart from "../../components/GeographyChart";
+import PieChart from "../../components/PieChart";
 import BarChart from "../../components/BarChart";
 import StatBox from "../../components/StatBox";
-import ProgressCircle from "../../components/ProgressCircle";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import AuthUser from "../../../../utils/AuthUser";
 
 const Dashboard = () => {
+  const { http } = AuthUser();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [total, setTotal] = useState([]);
+  const [totalCategory, setTotalCategory] = useState([]);
+
+  const [barNews, setBarNews] = useState([]);
+  const [lineComment, setLineComment] = useState([]);
+  const years = [];
+  const currentYear = new Date().getFullYear();
+
+  const [yearss, setYearss] = useState(currentYear);
+  const [yearsc, setYearsC] = useState(currentYear);
+
+  for (let year = currentYear - 10; year <= currentYear; year++) {
+    years.push(year);
+  }
+
+  //fake
+
+  function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateMockBarNew() {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const mockBarNew = months.map((month) => ({
+      real: getRandomNumber(100, 999),
+      fake: getRandomNumber(100, 999),
+      month: month,
+    }));
+
+    return mockBarNew;
+  }
+
+  function generateMockLineComment() {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const mockLineComment = {
+      id: "comment",
+      color: tokens("dark").greenAccent[500],
+      data: months.map((month) => ({
+        x: month,
+        y: month === "December" ? 14 : getRandomNumber(100, 999),
+      })),
+    };
+
+    return [mockLineComment];
+  }
+
+  const fetchNews = async (year) => {
+    await http
+      .get(`/admin/total_news/${year}`)
+      .then((resolve) => {
+        console.log("total_news:", resolve);
+        const newData = [];
+
+        for (const key in resolve.data.total_fake_news) {
+          const month = resolve.data.total_fake_news[key].month;
+          const realValue = resolve.data.total_real_news[key].total;
+          const fakeValue = resolve.data.total_fake_news[key].total;
+
+          newData.push({ real: realValue, fake: fakeValue, month });
+        }
+        // Cập nhật dữ liệu sau khi chuyển đổi
+        // setBarNews(newData);
+        setBarNews(dataBar);
+      })
+      .catch((reject) => {
+        console.log(reject);
+      });
+  };
+
+  const fetchComment = async (year) => {
+    await http
+      .get(`/admin/total_comments/${year}`)
+      .then((resolve) => {
+        console.log("total_comments:", resolve);
+
+        // Cập nhật dữ liệu sau khi chuyển đổi
+        setLineComment(resolve.data.total_comment);
+      })
+      .catch((reject) => {
+        console.log(reject);
+      });
+  };
+
+  const handleSelectYearNews = (selectedOption) => {
+    // Xử lý sự kiện khi người dùng chọn option
+    const data = generateMockBarNew();
+    setBarNews(data);
+    // fetchNews(selectedOption);
+    setYearss(selectedOption);
+  };
+  const handleSelectYearComment = (selectedOption) => {
+    // Xử lý sự kiện khi người dùng chọn option
+    const data = generateMockLineComment();
+    setLineComment(data);
+    // fetchComment(selectedOption);
+    setYearsC(selectedOption);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await http
+        .get(`/admin/total_news/${currentYear}`)
+        .then((resolve) => {
+          console.log("total_news:", resolve);
+          const newData = [];
+
+          for (const key in resolve.data.total_fake_news) {
+            const month = resolve.data.total_fake_news[key].month;
+            const realValue = resolve.data.total_real_news[key].total;
+            const fakeValue = resolve.data.total_fake_news[key].total;
+
+            newData.push({ real: realValue, fake: fakeValue, month });
+          }
+          // Cập nhật dữ liệu sau khi chuyển đổi
+          // setBarNews(newData);
+          setBarNews(dataBar);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+      await http
+        .get(`/admin/total_comments/${2023}`)
+        .then((resolve) => {
+          console.log("total_comments:", resolve);
+          // setLineComment(resolve.data.total_comment);
+          setLineComment(dataLine);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+      await http
+        .get(`/admin/total_month/`)
+        .then((resolve) => {
+          console.log("total_month:", resolve);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+      await http
+        .get(`/admin/total_category/`)
+        .then((resolve) => {
+          console.log("total_category:", resolve);
+          const categoriesData = resolve.data.categories;
+
+          const updatedCategories = categoriesData.map((category) => {
+            return {
+              ...category,
+              label: category.name,
+              value: category.news_count,
+            };
+          });
+
+          setTotalCategory(updatedCategories);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+      await http
+        .get(`/admin/total/`)
+        .then((resolve) => {
+          console.log("total:", resolve);
+          setTotal(resolve.data);
+        })
+        .catch((reject) => {
+          console.log(reject);
+        });
+    };
+    fetchData();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box m="20px">
       {/* HEADER */}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
-        <Box>
+        {/* <Box>
           <Button
             sx={{
               backgroundColor: colors.blueAccent[700],
@@ -37,7 +240,7 @@ const Dashboard = () => {
             <DownloadOutlinedIcon sx={{ mr: "10px" }} />
             Download Reports
           </Button>
-        </Box>
+        </Box> */}
       </Box>
 
       {/* GRID & CHARTS */}
@@ -49,15 +252,15 @@ const Dashboard = () => {
       >
         {/* ROW 1 */}
         <Box
-          gridColumn="span 3"
+          gridColumn="span 4"
           backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
         >
           <StatBox
-            title="12,361"
-            subtitle="Emails Sent"
+            title={total.total_comment}
+            subtitle="Comment"
             progress="0.75"
             increase="+14%"
             icon={
@@ -68,57 +271,38 @@ const Dashboard = () => {
           />
         </Box>
         <Box
-          gridColumn="span 3"
+          gridColumn="span 4"
           backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
         >
           <StatBox
-            title="431,225"
-            subtitle="Sales Obtained"
+            title={total.total_news}
+            subtitle="News"
             progress="0.50"
             increase="+21%"
             icon={
-              <PointOfSaleIcon
+              <NewspaperIcon
                 sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
               />
             }
           />
         </Box>
         <Box
-          gridColumn="span 3"
+          gridColumn="span 4"
           backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
         >
           <StatBox
-            title="32,441"
-            subtitle="New Clients"
+            title={total.total_user}
+            subtitle="User"
             progress="0.30"
             increase="+5%"
             icon={
               <PersonAddIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="1,325,134"
-            subtitle="Traffic Received"
-            progress="0.80"
-            increase="+43%"
-            icon={
-              <TrafficIcon
                 sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
               />
             }
@@ -144,80 +328,26 @@ const Dashboard = () => {
                 fontWeight="600"
                 color={colors.grey[100]}
               >
-                Revenue Generated
-              </Typography>
-              <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.greenAccent[500]}
-              >
-                $59,342.32
+                Comment in month
               </Typography>
             </Box>
             <Box>
-              <IconButton>
-                <DownloadOutlinedIcon
-                  sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
+              <Box>
+                <Select
+                  placeholder="Please select Year"
+                  options={years.map((year) => ({
+                    label: year.toString(),
+                    value: year,
+                  }))}
+                  onChange={handleSelectYearComment}
                 />
-              </IconButton>
+              </Box>
             </Box>
           </Box>
           <Box height="250px" m="-20px 0 0 0">
-            <LineChart isDashboard={true} />
+            <LineChart isDashboard={true} newData={lineComment} />
           </Box>
         </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          overflow="auto"
-        >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            borderBottom={`4px solid ${colors.primary[500]}`}
-            colors={colors.grey[100]}
-            p="15px"
-          >
-            <Typography color={colors.grey[100]} variant="h5" fontWeight="600">
-              Recent Transactions
-            </Typography>
-          </Box>
-          {mockTransactions.map((transaction, i) => (
-            <Box
-              key={`${transaction.txId}-${i}`}
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              borderBottom={`4px solid ${colors.primary[500]}`}
-              p="15px"
-            >
-              <Box>
-                <Typography
-                  color={colors.greenAccent[500]}
-                  variant="h5"
-                  fontWeight="600"
-                >
-                  {transaction.txId}
-                </Typography>
-                <Typography color={colors.grey[100]}>
-                  {transaction.user}
-                </Typography>
-              </Box>
-              <Box color={colors.grey[100]}>{transaction.date}</Box>
-              <Box
-                backgroundColor={colors.greenAccent[500]}
-                p="5px 10px"
-                borderRadius="4px"
-              >
-                ${transaction.cost}
-              </Box>
-            </Box>
-          ))}
-        </Box>
-
-        {/* ROW 3 */}
         <Box
           gridColumn="span 4"
           gridRow="span 2"
@@ -225,58 +355,58 @@ const Dashboard = () => {
           p="30px"
         >
           <Typography variant="h5" fontWeight="600">
-            Campaign
+            News in category
           </Typography>
+          <PieChart newsData={totalCategory} a={0} />
+        </Box>
+
+        {/* ROW 3 */}
+        <Box
+          gridColumn="span 8"
+          gridRow="span 2"
+          backgroundColor={colors.primary[400]}
+        >
           <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
             mt="25px"
+            p="0 30px"
+            display="flex "
+            justifyContent="space-between"
+            alignItems="center"
           >
-            <ProgressCircle size="125" />
-            <Typography
-              variant="h5"
-              color={colors.greenAccent[500]}
-              sx={{ mt: "15px" }}
-            >
-              $48,352 revenue generated
-            </Typography>
-            <Typography>Includes extra misc expenditures and costs</Typography>
+            <Box>
+              <Typography variant="h5" fontWeight="600">
+                Total news
+              </Typography>
+            </Box>
+            <Box>
+              <Select
+                placeholder="Please select Year"
+                options={years.map((year) => ({
+                  label: year.toString(),
+                  value: year,
+                }))}
+                onChange={handleSelectYearNews}
+              />
+            </Box>
           </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-        >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ padding: "30px 30px 0 30px" }}
-          >
-            Sales Quantity
-          </Typography>
+
           <Box height="250px" mt="-20px">
-            <BarChart isDashboard={true} />
+            <BarChart isDashboard={true} newsData={barNews} />
           </Box>
         </Box>
         <Box
           gridColumn="span 4"
           gridRow="span 2"
           backgroundColor={colors.primary[400]}
-          padding="30px"
+          p="30px"
         >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ marginBottom: "15px" }}
-          >
-            Geography Based Traffic
+          <Typography variant="h5" fontWeight="600">
+            Total in month
           </Typography>
-          <Box height="200px">
-            <GeographyChart isDashboard={true} />
-          </Box>
+          <PieChart newsData={data} a={0} />
         </Box>
+
+        {/* ROW 4 */}
       </Box>
     </Box>
   );
