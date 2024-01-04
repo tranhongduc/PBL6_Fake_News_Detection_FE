@@ -95,14 +95,26 @@ const Create = () => {
       }
 
       http.post('user/news/store/', formData)
-        .then(() => {
-          Swal.fire(
-            'Good job!',
-            'You\'ve created new blog successfully',
-            'success'
-          ).then(() => {
-            navigate(0);
-          })
+        .then((resolve) => {
+          const label = resolve.data.data.label
+
+          if (label === "real") {
+            Swal.fire(
+              'Good job!',
+              'You\'ve created new blog successfully',
+              'success'
+            ).then(() => {
+              navigate(0);
+            })
+          } else {
+            Swal.fire(
+              'Oops..',
+              'Looks like you just posted a fake news',
+              'error'
+            ).then(() => {
+              navigate(0);
+            })
+          }
         })
         .catch((reject) => {
           console.log(reject);
